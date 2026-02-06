@@ -131,9 +131,6 @@
             }
 
             > li {
-                @media (min-width: $md) {
-                    max-width: 20%;
-                }
 
                 > a { //Links 1st level
                     font-weight: 600;

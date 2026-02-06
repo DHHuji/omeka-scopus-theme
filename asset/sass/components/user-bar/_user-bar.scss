@@ -1,8 +1,19 @@
-#user-bar {
+body.user-bar #user-bar {
     gap: 15px;
+    background-color: $color__secondary !important;
+    color: $color__secondary-contrast !important;
+    border-bottom: 1px solid $color__secondary-dark !important;
+    padding: 8px 24px !important;
 
     a {
         display: block;
+        color: $color__secondary-contrast !important;
+        text-decoration: none;
+
+        &:hover,
+        &:focus {
+            text-decoration: underline;
+        }
 
         @media(min-width: $lg) {
             display: initial;
@@ -50,6 +61,9 @@
             margin-top: 15px;
             padding: 6px 10px;
             text-decoration: none;
+            border-radius: $radius__pill;
+            background-color: rgba($color__white, 0.12);
+            border: 1px solid rgba($color__white, 0.2);
 
             @media(min-width: $lg) {
                 margin-left: 12px;

@@ -1,3 +1,36 @@
+html,
 body {
-    background: $color__bg-body; // Fallback for when there is no custom background color defined.
+    background: linear-gradient(180deg, #f7fbfa 0%, #ffffff 35%, #ffffff 100%); // Fallback for when there is no custom background color defined.
+    color: $color__main-text;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    overscroll-behavior: none;
+    min-height: 100%;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+body.minimal {
+    background: linear-gradient(140deg, #e9f4f1 0%, #ffffff 65%);
+    color: $color__main-text;
+}
+
+body.minimal #content {
+    background: $color__white;
+    border-radius: $radius__base;
+    box-shadow: $shadow__soft;
+    padding: 30px;
+}
+
+#main-content,
+#content {
+    flex: 1 0 auto;
+}
+
+footer {
+    margin-top: auto;
 }

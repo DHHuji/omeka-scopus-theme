@@ -40,12 +40,14 @@
     appearance: none;
     -moz-appearance: none;
     -webkit-appearance: none;
-    border-radius: 3px;
+    border-radius: $radius__base;
     cursor: pointer;
-    padding: 10px 40px;
+    padding: 12px 28px;
     text-decoration: none;
-    text-transform: uppercase;
+    text-transform: none;
     transition: all 0.3s ease;
+    font-weight: 600;
+    letter-spacing: 0.01em;
 }
 
 @mixin primary-button {
