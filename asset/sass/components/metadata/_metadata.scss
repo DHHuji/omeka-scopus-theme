@@ -75,6 +75,55 @@
             .language {
                 margin-inline-end: 5px;
             }
+
+            &.collapsible-property {
+                summary {
+                    display: inline-flex;
+                    align-items: center;
+                    color: $color__headings;
+                    font-size: 1rem;
+                    font-weight: 600;
+                    line-height: 1.2;
+                    margin-bottom: 0.5rem;
+                    padding-inline-end: 15px;
+                    word-wrap: break-word;
+                    cursor: pointer;
+                    list-style: none;
+                    
+                    @media (min-width: $md) {
+                        font-size: 1.125rem;
+                    }
+
+                    &::-webkit-details-marker {
+                        display: none;
+                    }
+
+                    &::after {
+                        @include font-awesome;
+                        content: "\f054";
+                        font-size: 0.6rem;
+                        margin-inline-start: 8px;
+                        transition: transform 0.2s ease;
+                        display: inline-block;
+                    }
+
+                    .field-term {
+                        font-size: $font__sm-size;
+                        font-weight: 500;
+                    }
+                }
+
+                details[open] > summary::after {
+                    transform: rotate(90deg);
+                }
+
+                dd {
+                    @media (min-width: $md) {
+                        margin-inline-start: 0;
+                    }
+                }
+
+            }
         }
     }
 

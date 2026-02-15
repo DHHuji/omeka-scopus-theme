@@ -20,6 +20,25 @@ $filterLocaleCallback = function ($value) use ($lang) {
     $valueLang = $value->lang();
     return $valueLang == '' || strcasecmp($valueLang, $lang) === 0;
 };
+
+$collapsibleMap = [];
+$normalizeCollapsibleValues = function ($raw) {
+    if (is_array($raw)) {
+        return array_filter(array_map('trim', $raw), 'strlen');
+    }
+    if (!is_string($raw) || $raw === '') {
+        return [];
+    }
+    return array_filter(array_map('trim', preg_split("/\\r\\n|\\r|\\n/", $raw)), 'strlen');
+};
+$collapsedRaw = $this->themeSetting('collapsible_properties_collapsed');
+foreach ($normalizeCollapsibleValues($collapsedRaw) as $value) {
+    $collapsibleMap[(string) $value] = false;
+}
+$expandedRaw = $this->themeSetting('collapsible_properties_expanded');
+foreach ($normalizeCollapsibleValues($expandedRaw) as $value) {
+    $collapsibleMap[(string) $value] = true;
+}
 ?>
 
 <dl>
@@ -41,14 +60,29 @@ foreach ($values as $term => $propertyData):
     } else {
         $propertyTerm = null;
     }
+    $propertyId = (string) $property->id();
+    $isCollapsible = array_key_exists($term, $collapsibleMap) || array_key_exists($propertyId, $collapsibleMap);
+    $isOpen = array_key_exists($term, $collapsibleMap)
+        ? $collapsibleMap[$term]
+        : (array_key_exists($propertyId, $collapsibleMap) ? $collapsibleMap[$propertyId] : false);
     ?>
-    <div class="property">
+    <div class="property<?php if ($isCollapsible) echo ' collapsible-property'; ?>">
+        <?php if ($isCollapsible): ?>
+        <details<?php if ($isOpen) echo ' open'; ?>>
+            <summary>
+            <?php echo $escape($propertyLabel); ?>
+            <?php if ($propertyTerm !== null) : ?>
+            <span class="field-term">(<?php echo $escape($propertyTerm); ?>)</span>
+            <?php endif; ?>
+            </summary>
+        <?php else: ?>
         <dt>
         <?php echo $escape($propertyLabel); ?>
         <?php if ($propertyTerm !== null) : ?>
         <span class="field-term">(<?php echo $escape($propertyTerm); ?>)</span>
         <?php endif; ?>
         </dt>
+        <?php endif; ?>
         <?php foreach ($propertyValues as $value): ?>
             <?php
             $valueType = $value->type();
@@ -88,6 +122,9 @@ foreach ($values as $term => $propertyData):
                 <?php $this->trigger('view.show.value', ['value' => $value]); ?>
             </dd>
         <?php endforeach; ?>
+        <?php if ($isCollapsible): ?>
+        </details>
+        <?php endif; ?>
     </div>
 <?php endforeach; ?>
 </dl>
