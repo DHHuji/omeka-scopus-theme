@@ -235,7 +235,7 @@ if (is_array($decoration) && in_array('media', $decoration)) {
 
             <div class="browse-controls">
                 <?php echo $this->pagination(); ?>
-                <?php echo $this->hyperlink($translate('Advanced search'), $this->url('site/resource', ['controller' => 'item', 'action' => 'search'], true), ['class' => 'advanced-search']); ?>
+                <?php echo $this->hyperlink($translate('Advanced search'), $this->AdvancedSearchUrl(), ['class' => 'advanced-search']); ?>
                 <?php echo $this->browse()->renderSortSelector('items'); ?>
             </div>
 

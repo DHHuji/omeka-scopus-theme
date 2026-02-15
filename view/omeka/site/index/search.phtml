@@ -14,6 +14,9 @@ $decorationClass = '';
 if (is_array($decoration) && in_array('media', $decoration)) {
     $decorationClass = 'decoration decoration--thumbnail';
 }
+
+$useAdvancedSearchModule = (bool) $this->themeSetting('use_advanced_search_module_default');
+$queryParamName = $useAdvancedSearchModule ? 'q' : 'fulltext_search';
 ?>
 
 <?php echo $this->pageTitle(sprintf($translate('Search results for “%s”'), $query)); ?>
@@ -72,7 +75,7 @@ if (is_array($decoration) && in_array('media', $decoration)) {
                     $url(
                         'site/resource',
                         ['controller' => $resourceControllers[$resourceName], 'action' => 'browse'],
-                        ['query' => ['fulltext_search' => $query]],
+                        ['query' => [$queryParamName => $query]],
                         true
                     )
                 ); ?>

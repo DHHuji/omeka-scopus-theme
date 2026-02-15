@@ -111,7 +111,7 @@ if (is_array($decoration) && in_array('media', $decoration)) {
     <?php endif; ?>
     <?php echo $this->browse()->renderSortSelector('items'); ?>
     <div class="advanced-search-container">
-        <?php echo $this->hyperlink($translate('Advanced search'), $this->url('site/resource', ['controller' => 'item', 'action' => 'search'], ['query' => $query], true), ['class' => 'advanced-search']); ?>
+        <?php echo $this->hyperlink($translate('Advanced search'), $this->AdvancedSearchUrl($query), ['class' => 'advanced-search']); ?>
     </div>
 </div>
 
