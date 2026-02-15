@@ -1,7 +1,7 @@
 #advanced-search {
     max-width: 840px;
-    margin-left: auto;
-    margin-right: auto;
+    margin-inline-start: auto;
+    margin-inline-end: auto;
     margin-top: 25px;
 
     &::after {
@@ -82,7 +82,7 @@
                 &:only-child {
                     .sub-field:last-of-type,
                     .sub-label:last-of-type {
-                        margin-right: 0;
+                        margin-inline-end: 0;
                     }
                 }
             }
@@ -93,7 +93,7 @@
     
                 @media (min-width: $md) {
                     flex: 1 1 100px;
-                    margin-right: 0;
+                    margin-inline-end: 0;
                     max-width: 100%;
                     min-width: 100px;
                 }
@@ -133,14 +133,14 @@
         
                     @media (min-width: $md) {
                         flex: 1 1 100px;
-                        margin-right: 15px;
+                        margin-inline-end: 15px;
                         max-width: 100%;
                         min-width: 100px;
                     }
 
                     &:last-child {
                         @media (min-width: $md) {
-                            margin-right: 0;
+                            margin-inline-end: 0;
                         }
                     }
                 }
@@ -222,11 +222,11 @@
             position: relative;
 
             > * {
-                margin-right: 15px;
+                margin-inline-end: 15px;
             }
 
             > *:last-child {
-                margin-right: 0;
+                margin-inline-end: 0;
             }
 
             .joiner {
@@ -257,7 +257,7 @@
         bottom: 0;
         gap: 20px;
         justify-content: center;
-        margin-left: calc((100vw - 100%) / -2);
+        margin-inline-start: calc((100vw - 100%) / -2);
         padding: 25px;
         position: -webkit-sticky;
         position: sticky;
@@ -270,8 +270,8 @@
             flex-direction: column;
             gap: 15px;
             justify-content: initial;
-            margin-left: 0;
-            margin-right: -140px;
+            margin-inline-start: 0;
+            margin-inline-end: -140px;
             padding: 0;
             width: auto;
         }

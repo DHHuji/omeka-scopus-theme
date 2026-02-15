@@ -16,7 +16,7 @@
 
     select {
         min-width: 100px;
-        padding-right: 45px;
+        padding-inline-end: 45px;
         width: auto;
     }
 
@@ -29,7 +29,7 @@
         display: flex;
         flex-wrap: nowrap;
         gap: 15px;
-        margin-left: auto;
+        margin-inline-start: auto;
         max-width: 100%;
 
         button {

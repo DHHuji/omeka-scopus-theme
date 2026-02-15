@@ -34,7 +34,7 @@
             dt {
                 line-height: 1.2;
                 margin-bottom: 0.5rem;
-                padding-right: 15px;
+                padding-inline-end: 15px;
                 word-wrap: break-word;
 
                 &:not(.sidebar-region &) {
@@ -63,7 +63,7 @@
 
                 &:not(.sidebar-region &) {
                     @media (min-width: $md) {
-                        margin-left: 170px;
+                        margin-inline-start: 170px;
                     }
                 }
 
@@ -73,7 +73,7 @@
             }
     
             .language {
-                margin-right: 5px;
+                margin-inline-end: 5px;
             }
         }
     }
@@ -87,7 +87,7 @@
         img {
             flex-shrink: 0;
             height: 60px;
-            margin-right: 1rem;
+            margin-inline-end: 1rem;
             object-fit: cover;
             width: 60px;
         }

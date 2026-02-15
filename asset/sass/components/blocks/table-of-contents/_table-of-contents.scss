@@ -1,7 +1,7 @@
 .toc-block {
 
     > ul {
-        border-left: none !important;
+        border-inline-start: none !important;
 
         > li {
             margin-bottom: 2rem !important;
@@ -13,7 +13,7 @@
                 font-weight: 600;
                 font-size: .75rem;
                 color: $color__primary;
-                margin-right: 15px;
+                margin-inline-end: 15px;
             }
         
             > a {
@@ -35,7 +35,7 @@
                     font-weight: 600;
                     font-size: .4rem;
                     color: $color__primary !important;
-                    margin-right: 15px;
+                    margin-inline-end: 15px;
                 }
     
             }

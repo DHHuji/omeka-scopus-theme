@@ -6,7 +6,7 @@
     transform: translateX( -100% );
     z-index: 23;
     top: $header-min-height;
-    left: 0;
+    inset-inline-start: 0;
     background-color: $color__menu-drawer;
     overflow-x: hidden;
     transition: all 0.3s ease-out;
@@ -17,8 +17,8 @@
     }
 
     > .wrap {
-        margin-left: auto;
-        margin-right: auto;
+        margin-inline-start: auto;
+        margin-inline-end: auto;
         max-width: $wrap-max-width;
 
         display: block;
@@ -41,7 +41,7 @@
             display: block;
             padding-top: 1rem;
             padding-bottom: 1rem;
-            padding-left: 4rem;
+            padding-inline-start: 4rem;
             // Force navigation anchors to inherit color
             color: inherit !important;
             text-decoration: none;
@@ -50,7 +50,7 @@
                 width: 26px;
                 height: 26px;
                 position: absolute;
-                left: 1.5rem;
+                inset-inline-start: 1.5rem;
                 content: '';
                 background-image: url(../img/chevron-right-thin.svg);
                 background-repeat: no-repeat;
@@ -70,15 +70,15 @@
 
         ul {
             list-style: none;
-            margin-left: 0;
-            padding-left: 0;
+            margin-inline-start: 0;
+            padding-inline-start: 0;
             padding-bottom: 20px;
         }
     
         li {
             position: static;
-            padding-left: 15px;
-            padding-right: 15px;
+            padding-inline-start: 15px;
+            padding-inline-end: 15px;
 
             &.active {
                 background-color: $color__primary;
@@ -136,7 +136,7 @@
                     display: block;
                     position: absolute;
                     top: 0;
-                    left: 100%;
+                    inset-inline-start: 100%;
                 }
             }
         }
@@ -152,14 +152,14 @@
                 background-size: contain;
                 height: 26px;
                 position: absolute;
-                right: 1rem;
+                inset-inline-end: 1rem;
                 transition: all .1s ease-in;
                 width: 26px;
             }
         }
 
         li:not(.menu-header) {
-            padding-left: 2rem;
+            padding-inline-start: 2rem;
         }
     }
 

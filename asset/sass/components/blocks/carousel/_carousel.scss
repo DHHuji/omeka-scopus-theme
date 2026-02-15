@@ -1,6 +1,6 @@
 .carousel-block {
-    padding-left: 45px;
-    padding-right: 45px;
+    padding-inline-start: 45px;
+    padding-inline-end: 45px;
 
     .slick-arrow {
         border: 1px solid $color__hr;
@@ -20,13 +20,13 @@
         }
 
         &.slick-next {
-            padding-left: 3px;
-            right: -45px;
+            padding-inline-start: 3px;
+            inset-inline-end: -45px;
         }
 
         &.slick-prev {
-            padding-right: 3px;
-            left: -45px;
+            padding-inline-end: 3px;
+            inset-inline-start: -45px;
         }
 
         .slick-prev-icon,

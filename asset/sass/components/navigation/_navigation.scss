@@ -36,7 +36,7 @@
             background: $color__primary;
             border-radius: 9px;
             opacity: 1;
-            left: 0;
+            inset-inline-start: 0;
             transform: rotate(0deg);
             transition: .25s ease-in-out;
         }
@@ -60,7 +60,7 @@
             span:nth-child(2) {
                 transform: rotate(45deg);
                 top: -1px;
-                left: 5px;
+                inset-inline-start: 5px;
             }
             
             span:nth-child(3) {
@@ -71,7 +71,7 @@
             span:nth-child(4) {
                 transform: rotate(-45deg);
                 top: 24px;
-                left: 5px;
+                inset-inline-start: 5px;
             }
         }
     }
@@ -80,11 +80,11 @@
         list-style: none;
         display: flex;
         margin-bottom: 0;
-        padding-left: 0;
-        margin-left: 0;
+        padding-inline-start: 0;
+        margin-inline-start: 0;
 
         .main-header--inline & {
-            margin-right: -15px;
+            margin-inline-end: -15px;
         }
 
         li {
@@ -114,8 +114,8 @@
                         width: 100%;
                         background: $color__buttons;
                         bottom: 0;
-                        left: 0;
-                        right: 0;
+                        inset-inline-start: 0;
+                        inset-inline-end: 0;
                         margin: auto;
                         transform: scale(1);
                     }
@@ -123,10 +123,10 @@
             }
 
             &.menu-item-has-children {
-                margin-right: 10px;
+                margin-inline-end: 10px;
 
                 a {
-                    margin-right: 5px;
+                    margin-inline-end: 5px;
                 }
 
                 button {
@@ -176,8 +176,8 @@
                     width: 100%;
                     background: $color__buttons;
                     bottom: 0;
-                    left: 0;
-                    right: 0;
+                    inset-inline-start: 0;
+                    inset-inline-end: 0;
                     margin: auto;
                     transform: scale(0);
                     transition: all 0.5s ease;
@@ -200,7 +200,7 @@
                 margin: 0;
                 padding: 0;
                 width: 100vw;
-                left: 0;
+                inset-inline-start: 0;
                 top: 100%;
 
                 > li { //mega menu columns
@@ -212,16 +212,16 @@
 
                     > ul { //2do level columns
                         margin-top: 0.8rem;
-                        margin-left: 0;
-                        padding-left: 0;
+                        margin-inline-start: 0;
+                        padding-inline-start: 0;
                         list-style: none;
 
                         li { //2do level links
                             margin-bottom: 5px;
 
                             ul {
-                                margin-left: 0;
-                                padding-left: 25px;
+                                margin-inline-start: 0;
+                                padding-inline-start: 25px;
                             }
                         }
                     }

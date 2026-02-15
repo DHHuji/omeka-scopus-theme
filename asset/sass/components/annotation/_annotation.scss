@@ -20,7 +20,7 @@
         opacity: 0;
         overflow: hidden;
         position: absolute;
-        left: 0;
+        inset-inline-start: 0;
         bottom: 10px;
         transition: opacity 0.3s ease-out;
         z-index: 2;
@@ -60,14 +60,14 @@
             float: inline-start;
             font-size: $font__xs-size;
             margin-bottom: 0.5rem;
-            padding-right: 10px;
+            padding-inline-end: 10px;
             width: 70px !important;
         }
 
         dd {
             font-size: $font__xs-size;
             margin: 0;
-            margin-left: 70px !important;
+            margin-inline-start: 70px !important;
 
             &.resource.media img {
                 display: block;

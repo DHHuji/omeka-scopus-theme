@@ -32,7 +32,7 @@
     .row-count {
         color: $color__secondary-text;
         font-size: $font__sm-size;
-        margin-right: 1rem;
+        margin-inline-end: 1rem;
     }
 
     .pager {
@@ -42,7 +42,7 @@
         }
 
         .gotopage-btn {
-            margin-left: 0.3rem;
+            margin-inline-start: 0.3rem;
             padding: 8px 15px;
             width: 54px;
         }

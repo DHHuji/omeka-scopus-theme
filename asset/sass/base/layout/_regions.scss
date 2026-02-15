@@ -40,7 +40,7 @@
         &--left {
             &::after {
                 @media (min-width: $md) {
-                    right: -30px;
+                    inset-inline-end: -30px;
                 }
             }
         }
@@ -48,7 +48,7 @@
         &--right {
             &::after {
                 @media (min-width: $md) {
-                    left: -30px;
+                    inset-inline-start: -30px;
                 }
             }
         }

@@ -9,7 +9,7 @@
 
     &__header {
         border: 1px solid $color__hr;
-        border-left: none;
+        border-inline-start: none;
         padding: 15px;
         position: relative;
         width: 100%;
@@ -18,20 +18,20 @@
             content: "";
             background-color: $color__primary;
             height: 100%;
-            left: 0;
+            inset-inline-start: 0;
             position: absolute;
             top: 0;
             width: 3px;
         }
 
         .language {
-            margin-left: 10px;
+            margin-inline-start: 10px;
         }
     }
 
     &__heading {
         margin-bottom: 0;
-        padding-left: 15px;
+        padding-inline-start: 15px;
     }
 
     &__content {

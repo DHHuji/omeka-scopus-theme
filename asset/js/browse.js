@@ -13,7 +13,8 @@
                     container: resourcesSet,
                     gutter: 27,
                     ultimateGutter: 27,
-                    surroundingGutter: false
+                    surroundingGutter: false,
+                    direction: document.documentElement.dir || 'ltr'
                 });
 
                 //Reset layout on img load

@@ -14,8 +14,8 @@
         width: 100%;
 
         @media (min-width: $xl) {
-            border-right: 1px solid #ececec;
-            padding-right: 1.6rem;
+            border-inline-end: 1px solid #ececec;
+            padding-inline-end: 1.6rem;
             width: 25%;
             z-index: auto !important;
         }
@@ -64,7 +64,7 @@
 
     .faceted-results {
         img {
-            margin-right: 1rem;
+            margin-inline-end: 1rem;
         }
 
         a {
@@ -98,19 +98,19 @@
     .select-list {
         display: flex;
         flex-wrap: wrap;
-        margin-left: 0 !important;
+        margin-inline-start: 0 !important;
         width: 100%;
 
         @media (min-width: $xl) {
             display: block;
-            margin-left: 1rem !important;
+            margin-inline-start: 1rem !important;
         }
 
         &-item {
-            margin-left: 1rem;
+            margin-inline-start: 1rem;
 
             @media (min-width: $xl) {
-                margin-left: 0;
+                margin-inline-start: 0;
             }
 
             &::before {
@@ -120,7 +120,7 @@
 
         &-expand,
         &-collapse {
-            margin-left: 1rem;
+            margin-inline-start: 1rem;
         }
     }
 
@@ -142,7 +142,7 @@
             content: "\f053";
             display: inline-block;
             font-size: .8rem;
-            padding-right: 5px;
+            padding-inline-end: 5px;
             text-decoration: none;
         }
     }

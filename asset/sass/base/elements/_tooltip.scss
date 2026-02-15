@@ -3,7 +3,7 @@
     color: $color__secondary-dark;
     font-size: 1.2rem;
     line-height: 1;
-    margin-left: 5px;
+    margin-inline-start: 5px;
     position: relative;
 
     &.is-visible .tooltip-text {
@@ -31,8 +31,8 @@
         bottom: 130%;
         color: $color__white;
         font-size: $font__xs-size;
-        left: 50%;
-        margin-left: -106px;
+        inset-inline-start: 50%;
+        margin-inline-start: -106px;
         padding: 12px;
         position: absolute;
         text-align: center;
@@ -45,8 +45,8 @@
             border-color: $color__secondary-dark transparent transparent transparent;
             border-style: solid;
             border-width: 5px;
-            left: 50%;
-            margin-left: -5px;
+            inset-inline-start: 50%;
+            margin-inline-start: -5px;
             position: absolute;
             top: 100%;
         }

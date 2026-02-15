@@ -1,8 +1,8 @@
 body.search {
     .results {
         max-width: 1160px;
-        margin-left: auto;
-        margin-right: auto;
+        margin-inline-start: auto;
+        margin-inline-end: auto;
         margin-bottom: 40px;
 
         .resource__content {

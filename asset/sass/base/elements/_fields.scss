@@ -113,10 +113,14 @@ select {
     background-color: $color__white;
     background-image: url("../img/arrow-down-blue.svg");
     background-position: calc(100% - 15px) center;
+
+    [dir="rtl"] & {
+        background-position: 15px center;
+    }
     background-size: 18px;
     background-repeat: no-repeat;
     height: 44px;
-    padding-right: 45px;
+    padding-inline-end: 45px;
 }
 
 label,
@@ -159,13 +163,13 @@ fieldset {
         flex: 1 1 100px;
         box-shadow: none;
         margin-bottom: 0;
-        margin-right: 15px;
+        margin-inline-end: 15px;
         max-width: 100%;
         min-width: 100px;
         padding: 0;
 
         &:last-of-type {
-            margin-right: 0;
+            margin-inline-end: 0;
         }
 
         .field-meta label {

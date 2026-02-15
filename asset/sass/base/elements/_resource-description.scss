@@ -17,9 +17,9 @@
             content: "";
             background: linear-gradient(to right, rgba($color__white, 0), rgba($color__white, 1) 60%);
             height: 1.7rem;
-            left: 50%;
+            inset-inline-start: 50%;
             position: absolute;
-            right: 0;
+            inset-inline-end: 0;
             top: 4.5rem;
         }
     }

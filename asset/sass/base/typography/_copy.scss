@@ -13,7 +13,7 @@ i {
 blockquote {
     display: flex;
     background-color: $color__white;
-    border-left: 3px solid $color__primary;
+    border-inline-start: 3px solid $color__primary;
     box-shadow: 0px 1px 8px rgba($color__black, 0.25);
     font-style: italic;
     padding: 20px 25px 20px 60px;
@@ -29,7 +29,7 @@ blockquote {
         color: $color__primary;
         content: "\f10d";
         font-size: 2rem;
-        left: 10px;
+        inset-inline-start: 10px;
         position: absolute;
         top: 0px;
     }
