@@ -39,17 +39,54 @@ $expandedRaw = $this->themeSetting('collapsible_properties_expanded');
 foreach ($normalizeCollapsibleValues($expandedRaw) as $value) {
     $collapsibleMap[(string) $value] = true;
 }
-?>
 
-<dl>
-<?php
-foreach ($values as $term => $propertyData):
+$normalizePropertySelectValues = function ($raw) {
+    if (is_array($raw)) {
+        return array_values(array_unique(array_filter(array_map('strval', $raw), 'strlen')));
+    }
+    if (!is_string($raw) || $raw === '') {
+        return [];
+    }
+    return array_values(array_unique(array_filter(array_map('trim', preg_split("/\\r\\n|\\r|\\n/", $raw)), 'strlen')));
+};
+
+$tabsMode = (string) $this->themeSetting('resource_page_values_mode', 'default');
+$configuredTabs = [];
+for ($i = 1; $i <= 6; $i++) {
+    $label = trim((string) $this->themeSetting(sprintf('resource_page_tab_%d_name', $i), ''));
+    if ($label === '') {
+        continue;
+    }
+    $propertiesRaw = $this->themeSetting(sprintf('resource_page_tab_%d_properties', $i));
+    $propertyMap = [];
+    foreach ($normalizePropertySelectValues($propertiesRaw) as $property) {
+        $propertyMap[(string) $property] = true;
+    }
+    $configuredTabs[] = [
+        'label' => $label,
+        'properties' => $propertyMap,
+    ];
+}
+$useTabs = $tabsMode === 'tabs' && count($configuredTabs) >= 2;
+
+$renderProperty = function ($term, $propertyData) use (
+    $filterLocale,
+    $filterLocaleCallback,
+    $translate,
+    $labelInfo,
+    $escape,
+    $collapsibleMap,
+    $showLocale,
+    $showValueAnnotations,
+    $decoration,
+    $lang
+) {
     $propertyValues = $propertyData['values'];
     if ($filterLocale) {
         $propertyValues = array_filter($propertyValues, $filterLocaleCallback);
     }
     if (!$propertyValues) {
-        continue;
+        return;
     }
     $property = $propertyData['property'];
     $propertyLabel = $propertyData['alternate_label'] ?: $translate($property->label());
@@ -126,5 +163,129 @@ foreach ($values as $term => $propertyData):
         </details>
         <?php endif; ?>
     </div>
-<?php endforeach; ?>
+    <?php
+};
+?>
+
+<?php if (!$useTabs): ?>
+<dl>
+    <?php foreach ($values as $term => $propertyData): ?>
+        <?php $renderProperty($term, $propertyData); ?>
+    <?php endforeach; ?>
 </dl>
+<?php else: ?>
+<?php
+$tabBuckets = array_fill(0, count($configuredTabs), []);
+foreach ($values as $term => $propertyData) {
+    $property = $propertyData['property'];
+    $propertyId = (string) $property->id();
+    $tabIndex = 0;
+    foreach ($configuredTabs as $index => $tab) {
+        if (isset($tab['properties'][$propertyId]) || isset($tab['properties'][(string) $term])) {
+            $tabIndex = $index;
+            break;
+        }
+    }
+    $tabBuckets[$tabIndex][$term] = $propertyData;
+}
+$tabsComponentId = 'resource-values-tabs-' . substr(md5(uniqid((string) mt_rand(), true)), 0, 8);
+?>
+<div class="resource-values-tabs" data-resource-values-tabs id="<?php echo $escape($tabsComponentId); ?>">
+    <div class="tabs is-toggle">
+        <ul role="tablist">
+            <?php foreach ($configuredTabs as $index => $tab): ?>
+            <li class="<?php echo $index === 0 ? 'is-active' : ''; ?>">
+                <a
+                    href="#<?php echo $escape($tabsComponentId . '-panel-' . $index); ?>"
+                    role="tab"
+                    aria-selected="<?php echo $index === 0 ? 'true' : 'false'; ?>"
+                    data-tab-target="<?php echo $escape($tabsComponentId . '-panel-' . $index); ?>"
+                >
+                    <?php echo $escape($tab['label']); ?>
+                </a>
+            </li>
+            <?php endforeach; ?>
+        </ul>
+    </div>
+    <?php foreach ($configuredTabs as $index => $tab): ?>
+    <div
+        id="<?php echo $escape($tabsComponentId . '-panel-' . $index); ?>"
+        class="resource-values-tabs__panel"
+        style="<?php echo $index === 0 ? '' : 'display: none;'; ?>"
+    >
+        <dl>
+            <?php foreach ($tabBuckets[$index] as $term => $propertyData): ?>
+                <?php $renderProperty($term, $propertyData); ?>
+            <?php endforeach; ?>
+        </dl>
+    </div>
+    <?php endforeach; ?>
+</div>
+<style>
+.resource-values-tabs .tabs ul {
+    border-bottom: 1px solid #dfdfdf;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    list-style: none;
+    margin: 0 auto 16px;
+    max-width: 100%;
+    padding: 0;
+}
+.resource-values-tabs .tabs li {
+    margin-block-start: 0;
+    margin-block-end: -1px;
+    margin-inline-start: 0;
+    margin-inline-end: 12px;
+}
+.resource-values-tabs .tabs li a {
+    border: 0;
+    border-bottom: 3px solid transparent;
+    color: #676767;
+    display: inline-flex;
+    justify-content: center;
+    min-width: 180px;
+    padding: 8px 18px;
+    text-decoration: none;
+    transition: color .2s ease, border-color .2s ease;
+}
+.resource-values-tabs .tabs li.is-active a {
+    border-bottom-color: var(--secondary, #2B7F8B);
+    color: var(--secondary, #2B7F8B);
+    font-weight: 600;
+}
+.resource-values-tabs .tabs li a:hover {
+    color: var(--secondary, #2B7F8B);
+}
+</style>
+<script>
+if (!window.ScopusResourceValueTabsInitialized) {
+    window.ScopusResourceValueTabsInitialized = true;
+    document.addEventListener('click', function (event) {
+        var tabLink = event.target.closest('[data-tab-target]');
+        if (!tabLink) {
+            return;
+        }
+        var wrapper = tabLink.closest('[data-resource-values-tabs]');
+        if (!wrapper) {
+            return;
+        }
+        event.preventDefault();
+        var targetId = tabLink.getAttribute('data-tab-target');
+        wrapper.querySelectorAll('.tabs li').forEach(function (item) {
+            item.classList.remove('is-active');
+        });
+        var currentItem = tabLink.closest('li');
+        if (currentItem) {
+            currentItem.classList.add('is-active');
+        }
+        wrapper.querySelectorAll('.resource-values-tabs__panel').forEach(function (panel) {
+            panel.style.display = panel.id === targetId ? '' : 'none';
+        });
+        wrapper.querySelectorAll('[role="tab"]').forEach(function (tab) {
+            tab.setAttribute('aria-selected', tab === tabLink ? 'true' : 'false');
+        });
+    });
+}
+</script>
+<?php endif; ?>
