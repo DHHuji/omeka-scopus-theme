@@ -29,6 +29,8 @@ body.minimal #content {
 #main-content,
 #content {
     flex: 1 0 auto;
+    max-width: calc(100vw - 16px);
+    padding: 1rem;
 }
 
 footer {

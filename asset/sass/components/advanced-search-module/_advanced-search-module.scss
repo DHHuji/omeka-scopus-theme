@@ -1,0 +1,247 @@
+/* Advanced Search Module
+--------------------------------------------- */
+
+#search-page {
+  h2 {
+    display: none;
+  }
+
+  h3 {
+    font-size: 1.2rem;
+  }
+
+  label {
+    padding-bottom: 4px;
+    font-size: 0.9rem;
+  }
+
+  input[type=range] {
+    padding: 8px 0;
+  }
+
+  select {
+    font-size: 0.9rem;
+  }
+
+  li.resource.item {
+    padding: 1rem;
+
+    .resource-heading {
+      &:hover {
+        color: $color__accent;
+      }
+    }
+
+    .resource-body.resource-metadata {
+      display: unset;
+
+      .description {
+        font-size: 0.8rem;
+        white-space: normal;
+
+        em {
+          font-style: normal;
+          background: $color__light-bg;
+          padding: 0 0.2em;
+          border-radius: 0.2em;
+        }
+      }
+    }
+  }
+
+  #form-search {
+    padding: 1rem 1rem 4rem;
+    margin: 0;
+
+    .field {
+      min-width: 240px;
+    }
+  }
+
+  select.chosen-select {
+    min-height: 128px;
+  }
+
+  .range-numeric {
+    font-size: 0.8rem;
+
+    input {
+      padding: 4px;
+    }
+  }
+
+  .search-form-buttons {
+    button {
+      float: unset;
+      position: relative;
+      right: calc(-100vw + 13rem);
+      bottom: 3.5rem;
+    }
+  }
+
+  .search-results-header {
+    align-items: center;
+    gap: 0.5rem;
+
+    border: 1px solid $color__hr;
+    border-radius: 10px;
+    padding: 0 1rem;
+
+    nav.pagination {
+      border: none;
+    }
+
+    .search-filters {
+      margin: 0;
+      padding: 16px 0 0 16px;
+
+      .filter {
+        padding: 2px;
+        margin-inline-start: 16px;
+      }
+    }
+
+    .filter a::after {
+      content: unset;
+    }
+  }
+
+  .search-facets {
+    background-color: $color__white;
+    border: 1px solid $color__hr;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 12px rgba($color__black, 0.05);
+  }
+
+  /* Sidebar Title (Facets) */
+
+  .search-facets h3 {
+    font-size: 1rem;
+    border-bottom: 2px solid $color__accent;
+    padding-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  /* Facet Group Headers (Journal, Year, etc.) */
+
+  .facet h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 20px 0 10px 0;
+    padding-inline-start: 5px;
+    border-inline-start: 3px solid $color__accent;
+  }
+
+  /* Facet Item List */
+
+  .facet-items {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .facet-item {
+    padding: 6px 8px;
+    margin: 0;
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+    display: flex;
+    align-items: center;
+    font-size: 0.9rem;
+    cursor: pointer;
+  }
+
+  .facet-item[hidden="hidden"] {
+    display: none !important;
+  }
+
+  .facet-item:hover {
+    background-color: $color__light-bg;
+  }
+
+  /* Number Counts in Parentheses */
+
+  .facet-item .count {
+    background-color: $color__gray-95;
+    color: $color__secondary-text;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 0.75rem;
+    margin-inline-start: auto;
+    font-weight: normal;
+  }
+
+  /* Checkboxes and Inputs */
+
+  .facet-item input[type="checkbox"] {
+    margin-inline-end: 10px;
+    accent-color: $color__accent;
+  }
+
+  /* Facet Action Buttons (Apply/Reset) */
+
+  .facets-actions {
+    display: flex;
+    gap: 10px;
+
+    button {
+      flex: 1;
+    }
+  }
+
+  .button.facets-apply {
+    background-color: $color__accent;
+    color: $color__white;
+    border: none;
+    border-radius: 5px;
+    padding: 8px 16px;
+    font-weight: 600;
+    cursor: pointer;
+    flex: 1;
+  }
+
+  .button.facets-reset {
+    background-color: $color__light-bg;
+    color: $color__accent;
+    border: 1px solid $color__accent;
+    border-radius: 5px;
+    padding: 8px 16px;
+    cursor: pointer;
+  }
+
+  .button.facets-apply:hover {
+    background-color: $color__accent-dark;
+  }
+
+  /* "See More" Button */
+
+  .facet-see-more button {
+    background: none;
+    border: none;
+    color: $color__accent;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 10px 5px;
+    font-size: 0.85rem;
+    text-decoration: underline;
+
+    &:focus {
+      color: $color__accent;
+    }
+  }
+
+  .facet-see-more-or-less.expand::after {
+    content: "";
+  }
+
+  .facet-see-more-or-less.collapse::after {
+    content: "";
+  }
+
+  .facet-elements {
+    display: flex;
+    flex-direction: column-reverse;
+  }
+}
