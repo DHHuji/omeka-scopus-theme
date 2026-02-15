@@ -1,6 +1,6 @@
 .alignleft {
     /*rtl:ignore*/
-    float: left;
+    float: inline-start;
 
     /*rtl:ignore*/
     margin-right: 1.5rem;
@@ -9,7 +9,7 @@
 
 .alignright {
     /*rtl:ignore*/
-    float: right;
+    float: inline-end;
 
     /*rtl:ignore*/
     margin-left: 1.5rem;
@@ -39,11 +39,11 @@
 }
 
 .textleft {
-    text-align: left;
+    text-align: start;
 }
 
 .textright {
-    text-align: right;
+    text-align: end;
 }
 
 .textcenter {

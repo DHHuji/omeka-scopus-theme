@@ -4,6 +4,6 @@
 
     .browse-all {
         @include secondary-button;
-        float: right;
+        float: inline-end;
     }
 }

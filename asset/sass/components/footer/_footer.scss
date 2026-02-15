@@ -70,7 +70,7 @@
 
         @media (min-width: $lg) {
             max-width: 30%;
-            text-align: left;
+            text-align: start;
         }
 
         .no-menu & {
@@ -117,7 +117,7 @@
 
             @media (min-width: $md) {
                 flex-direction: row;
-                text-align: left;
+                text-align: start;
             }
 
             @media (min-width: $lg) {
@@ -208,7 +208,7 @@
 
         @media (min-width: $lg) {
             flex-direction: row;
-            text-align: left;
+            text-align: start;
         }
 
         &.has-social-networks {

@@ -40,7 +40,7 @@
                 &:not(.sidebar-region &) {
                     @media (min-width: $md) {
                         margin-bottom: 0;
-                        float: left;
+                        float: inline-start;
                         width: 170px;
                     }
                 }
