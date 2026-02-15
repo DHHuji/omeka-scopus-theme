@@ -15,7 +15,8 @@ if (is_array($decoration) && in_array('media', $decoration)) {
     $decorationClass = 'decoration decoration--thumbnail';
 }
 
-$useAdvancedSearchModule = (bool) $this->themeSetting('use_advanced_search_module_default');
+$advancedSearchPageSlug = trim((string) $this->themeSetting('advanced_search_page_slug', ''));
+$useAdvancedSearchModule = $advancedSearchPageSlug !== '';
 $queryParamName = $useAdvancedSearchModule ? 'q' : 'fulltext_search';
 ?>
 

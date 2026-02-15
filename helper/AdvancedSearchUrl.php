@@ -6,7 +6,7 @@ use Laminas\View\Helper\AbstractHelper;
 class AdvancedSearchUrl extends AbstractHelper
 {
     /**
-     * Returns advanced item search url, optionally via AdvancedSearch module.
+     * Returns advanced item search url using optional configured slug.
      *
      * @param array $query Query parameters to append to the url.
      * @return string
@@ -14,8 +14,8 @@ class AdvancedSearchUrl extends AbstractHelper
     public function __invoke(array $query = [])
     {
         $view = $this->getView();
-        $useAdvancedSearchModule = (bool) $view->themeSetting('use_advanced_search_module_default');
-        if ($useAdvancedSearchModule) {
+        $slugOverride = trim((string) $view->themeSetting('advanced_search_page_slug', ''));
+        if ($slugOverride !== '') {
             $query = $this->normalizeAdvancedSearchQuery($query);
         }
         $options = $query ? ['query' => $query] : [];
@@ -27,38 +27,24 @@ class AdvancedSearchUrl extends AbstractHelper
             true
         );
 
-        if (!$useAdvancedSearchModule) {
-            return $fallbackUrl;
-        }
-
-        // Prefer the module helper when available to keep behavior aligned.
-        try {
-            $pluginManager = $view->getHelperPluginManager();
-            if ($pluginManager->has('searchingUrl')) {
-                return $view->plugin('searchingUrl')->__invoke(true, $options);
+        if ($slugOverride !== '') {
+            try {
+                $baseUrl = null;
+                if ($view->status()->isSiteRequest()) {
+                    $site = $view->currentSite();
+                    if ($site) {
+                        $baseUrl = rtrim($site->siteUrl(), '/') . '/' . ltrim($slugOverride, '/');
+                    }
+                }
+                if (!$baseUrl) {
+                    $baseUrl = $view->url('search-page-' . $slugOverride, [], [], true);
+                }
+                return $this->appendQuery($baseUrl, $query);
+            } catch (\Throwable $e) {
             }
-        } catch (\Throwable $e) {
         }
 
-        // Fallback if module helper is not available in this context.
-        try {
-            $searchMainConfig = $view->status()->isSiteRequest()
-                ? $view->siteSetting('advancedsearch_main_config')
-                : $view->setting('advancedsearch_main_config');
-
-            if (!$searchMainConfig) {
-                return $fallbackUrl;
-            }
-
-            $searchConfig = $view->api()->read(
-                'search_configs',
-                [is_numeric($searchMainConfig) ? 'id' : 'slug' => $searchMainConfig]
-            )->getContent();
-
-            return $view->url('search-page-' . $searchConfig->slug(), [], $options, true);
-        } catch (\Throwable $e) {
-            return $fallbackUrl;
-        }
+        return $fallbackUrl;
     }
 
     /**
@@ -74,5 +60,21 @@ class AdvancedSearchUrl extends AbstractHelper
         }
         unset($query['fulltext_search']);
         return $query;
+    }
+
+    /**
+     * Appends query parameters to an URL.
+     *
+     * @param string $url
+     * @param array $query
+     * @return string
+     */
+    protected function appendQuery(string $url, array $query): string
+    {
+        if (!$query) {
+            return $url;
+        }
+        $separator = strpos($url, '?') === false ? '?' : '&';
+        return $url . $separator . http_build_query($query, '', '&', PHP_QUERY_RFC3986);
     }
 }

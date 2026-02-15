@@ -1,6 +1,7 @@
 <?php
 $translate = $this->plugin('translate');
-$useAdvancedSearchModule = (bool) $this->themeSetting('use_advanced_search_module_default');
+$advancedSearchPageSlug = trim((string) $this->themeSetting('advanced_search_page_slug', ''));
+$useAdvancedSearchModule = $advancedSearchPageSlug !== '';
 
 if ($useAdvancedSearchModule) {
     $searchAction = $this->AdvancedSearchUrl();
