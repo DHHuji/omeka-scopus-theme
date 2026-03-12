@@ -228,6 +228,70 @@ if (!$configuredTabs) {
 }
 $useTabs = $tabsMode === 'tabs' && count($configuredTabs) >= 2;
 
+$api = $this->plugin('api');
+$propertyStrengthHistograms = [];
+$getPropertyStrengthHistogram = function (string $propertyId, string $resourceClassId) use (&$propertyStrengthHistograms, $api) {
+    $cacheKey = $propertyId . ':' . $resourceClassId;
+    if (array_key_exists($cacheKey, $propertyStrengthHistograms)) {
+        return $propertyStrengthHistograms[$cacheKey];
+    }
+
+    $propertyStrengthHistograms[$cacheKey] = [];
+
+    $propertyTerms = [
+        '3' => 'dcterms:subject',
+    ];
+    $propertyTerm = $propertyTerms[$propertyId] ?? null;
+    if ($propertyTerm === null) {
+        return $propertyStrengthHistograms[$cacheKey];
+    }
+
+    try {
+        $page = 1;
+        $perPage = 500;
+        $totalResults = null;
+        $processedItems = 0;
+        $processedValues = 0;
+
+        do {
+            $response = $api->search('items', [
+                'resource_class_id' => (int) $resourceClassId,
+                'page' => $page,
+                'per_page' => $perPage,
+            ]);
+            $items = $response->getContent();
+            if (!is_array($items)) {
+                $items = [];
+            }
+            if ($totalResults === null) {
+                $totalResults = (int) $response->getTotalResults();
+            }
+
+            foreach ($items as $item) {
+                $processedItems++;
+                foreach ($item->value($propertyTerm, ['all' => true]) as $value) {
+                    $valueText = trim((string) $value->value());
+                    if ($valueText === '') {
+                        continue;
+                    }
+                    $valueKey = mb_strtolower($valueText);
+                    if (!isset($propertyStrengthHistograms[$cacheKey][$valueKey])) {
+                        $propertyStrengthHistograms[$cacheKey][$valueKey] = 0;
+                    }
+                    $propertyStrengthHistograms[$cacheKey][$valueKey]++;
+                    $processedValues++;
+                }
+            }
+
+            $page++;
+        } while ($items && $processedItems < $totalResults);
+    } catch (\Throwable $e) {
+        $propertyStrengthHistograms[$cacheKey] = [];
+    }
+
+    return $propertyStrengthHistograms[$cacheKey];
+};
+
 $propertyColorMaps = [
     '38' => [
         'beige' => '#F5F5DC',
@@ -288,7 +352,9 @@ $renderProperty = function ($term, $propertyData) use (
     $showValueAnnotations,
     $decoration,
     $lang,
-    $propertyColorMaps
+    $propertyColorMaps,
+    $resource,
+    $getPropertyStrengthHistogram
 ) {
     $propertyValues = $propertyData['values'];
     if ($filterLocale) {
@@ -307,6 +373,17 @@ $renderProperty = function ($term, $propertyData) use (
         $propertyTerm = null;
     }
     $propertyId = (string) $property->id();
+    $propertyStrengthHistogram = $propertyId === '3'
+        ? $getPropertyStrengthHistogram('3', '127')
+        : [];
+    $propertyStrengthMetrics = ['min' => null, 'max' => null];
+    if ($propertyId === '3' && $propertyStrengthHistogram) {
+        $strengthValues = array_values($propertyStrengthHistogram);
+        $propertyStrengthMetrics = [
+            'min' => min($strengthValues),
+            'max' => max($strengthValues),
+        ];
+    }
     $isCollapsible = array_key_exists($term, $collapsibleMap) || array_key_exists($propertyId, $collapsibleMap);
     $isOpen = array_key_exists($term, $collapsibleMap)
         ? $collapsibleMap[$term]
@@ -349,6 +426,16 @@ $renderProperty = function ($term, $propertyData) use (
             $normalizedValueText = mb_strtolower($valueText);
             $colorMap = $propertyColorMaps[$propertyId] ?? null;
             $valueColor = $colorMap[$normalizedValueText] ?? null;
+            $valueStrength = $propertyStrengthHistogram[$normalizedValueText] ?? null;
+            $valueFontSize = null;
+            if ($valueStrength !== null && $propertyStrengthMetrics['min'] !== null && $propertyStrengthMetrics['max'] !== null) {
+                $minStrength = (int) $propertyStrengthMetrics['min'];
+                $maxStrength = (int) $propertyStrengthMetrics['max'];
+                $relativeStrength = $maxStrength > $minStrength
+                    ? (($valueStrength - $minStrength) / ($maxStrength - $minStrength))
+                    : 1;
+                $valueFontSize = 0.5 + ($relativeStrength * 2.0);
+            }
             $class = ['value'];
             if ('resource' == $valueType || strpos($valueType, 'resource') !== false) {
                 $class[] = 'resource';
@@ -361,7 +448,13 @@ $renderProperty = function ($term, $propertyData) use (
                 $class[] = 'uri';
             }
             ?>
-            <dd class="<?php echo implode(' ', $class); ?>" lang="<?php echo $escape($valueLang); ?>">
+            <dd
+                class="<?php echo implode(' ', $class); ?>"
+                lang="<?php echo $escape($valueLang); ?>"
+                <?php if ($valueStrength !== null) : ?>
+                    data-value-strength="<?php echo $escape((string) $valueStrength); ?>"
+                <?php endif; ?>
+            >
                 <?php if ($showLocale && $valueLang) : ?>
                     <span class="language"><?php echo $valueLang; ?></span>
                 <?php endif; ?>
@@ -372,7 +465,18 @@ $renderProperty = function ($term, $propertyData) use (
                         style="background-color: <?php echo $escape($valueColor); ?>;"
                     ></span>
                 <?php endif; ?>
-                <span class="value-content"><?php echo $filterLocale ? $value->asHtml($lang) : $value->asHtml(); ?></span>
+                <span
+                    class="value-content"
+                    <?php if ($valueFontSize !== null) : ?>
+                        style="font-size: <?php echo $escape(number_format($valueFontSize, 3, '.', '')); ?>rem;"
+                    <?php endif; ?>
+                ><?php echo $filterLocale ? $value->asHtml($lang) : $value->asHtml(); ?></span>
+                <?php if ($valueStrength !== null) : ?>
+                    <span
+                        class="value-strength"
+                        title="<?php echo $escape(sprintf('This keyword appears %d times across all records', $valueStrength)); ?>"
+                    ><?php echo $escape((string) $valueStrength); ?></span>
+                <?php endif; ?>
                 <?php if(!$value->isPublic()) : ?>
                     <span class="o-icon-private" aria-role="tooltip" title="<?php echo $this->escapeHtml($translate('Private')); ?>" aria-label="<?php echo $this->escapeHtml($translate('Private')); ?>"></span>
                 <?php endif; ?>
@@ -406,6 +510,19 @@ $renderProperty = function ($term, $propertyData) use (
     margin-inline-end: .45em;
     vertical-align: -.05em;
     width: .85em;
+}
+.value-strength {
+    border: 1px solid #d0d0d0;
+    border-radius: 999px;
+    color: #555;
+    display: inline-block;
+    font-size: .85em;
+    line-height: 1;
+    margin-inline-start: .5em;
+    min-width: 2.1em;
+    padding: .18em .45em;
+    text-align: center;
+    vertical-align: .08em;
 }
 </style>
 
