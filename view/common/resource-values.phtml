@@ -248,6 +248,7 @@ $renderProperty = function ($term, $propertyData) use (
         return;
     }
     $property = $propertyData['property'];
+    $isMultiValue = count($propertyValues) > 1;
     $propertyLabel = $propertyData['alternate_label'] ?: $translate($property->label());
     if ('term' === $labelInfo) {
         $propertyTerm = $property->term();
@@ -263,13 +264,13 @@ $renderProperty = function ($term, $propertyData) use (
         : (array_key_exists($propertyId, $collapsibleMap) ? $collapsibleMap[$propertyId] : false);
     ?>
     <div
-        class="property<?php if ($isCollapsible) echo ' collapsible-property'; ?>"
+        class="property<?php if ($isCollapsible) echo ' collapsible-property'; ?><?php if ($isMultiValue) echo ' property--grid'; ?>"
         data-property-label="<?php echo $escape($propertyLabel); ?>"
         data-property-term="<?php echo $escape($property->term()); ?>"
         data-property-id="<?php echo $escape($propertyId); ?>"
     >
         <?php if ($isCollapsible): ?>
-        <details<?php if ($isOpen) echo ' open'; ?>>
+        <details class="<?php if ($isMultiValue) echo 'property__details--grid'; ?>"<?php if ($isOpen) echo ' open'; ?>>
             <summary
                 data-property-label="<?php echo $escape($propertyLabel); ?>"
                 data-property-term="<?php echo $escape($property->term()); ?>"
@@ -289,6 +290,9 @@ $renderProperty = function ($term, $propertyData) use (
         <span class="field-term">(<?php echo $escape($propertyTerm); ?>)</span>
         <?php endif; ?>
         </dt>
+        <?php endif; ?>
+        <?php if ($isMultiValue): ?>
+        <div class="property__values">
         <?php endif; ?>
         <?php foreach ($propertyValues as $value): ?>
             <?php
@@ -329,6 +333,9 @@ $renderProperty = function ($term, $propertyData) use (
                 <?php $this->trigger('view.show.value', ['value' => $value]); ?>
             </dd>
         <?php endforeach; ?>
+        <?php if ($isMultiValue): ?>
+        </div>
+        <?php endif; ?>
         <?php if ($isCollapsible): ?>
         </details>
         <?php endif; ?>
@@ -391,43 +398,6 @@ $tabsComponentId = 'resource-values-tabs-' . substr(md5(uniqid((string) mt_rand(
     </div>
     <?php endforeach; ?>
 </div>
-<style>
-.resource-values-tabs .tabs ul {
-    border-bottom: 1px solid #dfdfdf;
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    list-style: none;
-    margin: 0 auto 16px;
-    max-width: 100%;
-    padding: 0;
-}
-.resource-values-tabs .tabs li {
-    margin-block-start: 0;
-    margin-block-end: -1px;
-    margin-inline-start: 0;
-    margin-inline-end: 12px;
-}
-.resource-values-tabs .tabs li a {
-    border: 0;
-    border-bottom: 3px solid transparent;
-    color: #676767;
-    display: inline-flex;
-    justify-content: center;
-    min-width: 180px;
-    padding: 8px 18px;
-    text-decoration: none;
-    transition: color .2s ease, border-color .2s ease;
-}
-.resource-values-tabs .tabs li.is-active a {
-    border-bottom-color: var(--secondary, #2B7F8B);
-    color: var(--secondary, #2B7F8B);
-    font-weight: 600;
-}
-.resource-values-tabs .tabs li a:hover {
-    color: var(--secondary, #2B7F8B);
-}
-</style>
 <script>
 if (!window.ScopusResourceValueTabsInitialized) {
     window.ScopusResourceValueTabsInitialized = true;
