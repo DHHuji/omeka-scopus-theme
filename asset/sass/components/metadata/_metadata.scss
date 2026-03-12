@@ -58,12 +58,6 @@
                 white-space: normal;
                 align-items: flex-start;
 
-                &:not(.sidebar-region &) {
-                    @media (min-width: $md) {
-                        margin-inline-start: 170px;
-                    }
-                }
-
                 &:last-child {
                     margin-bottom: 0;
                 }
@@ -121,6 +115,105 @@
                 }
 
             }
+
+            .value-color-marker {
+                border: 1px solid #000;
+                border-radius: 999px;
+                display: inline-block;
+                height: .85em;
+                margin-inline-end: .45em;
+                vertical-align: -.05em;
+                width: .85em;
+            }
+
+            .value-strength {
+                border: 1px solid #d0d0d0;
+                border-radius: 999px;
+                color: #555;
+                display: inline-block;
+                font-size: .85em;
+                line-height: 1;
+                margin-inline-start: .5em;
+                min-width: 2.1em;
+                padding: .18em .45em;
+                text-align: center;
+                vertical-align: .08em;
+            }
+
+            &.property--grid {
+                display: grid;
+                gap: .5rem 0;
+                grid-template-columns: 170px minmax(0, 1fr);
+                align-items: start;
+
+                > dt {
+                    grid-column: 1;
+                    align-self: start;
+                }
+
+                > details,
+                .property__details--grid > summary {
+                    grid-column: 1 / -1;
+                }
+
+                > .property__values {
+                    display: grid;
+                    gap: .5rem 1rem;
+                    grid-column: 2;
+                    grid-template-columns: repeat(auto-fit, minmax(120px, max-content));
+                    justify-content: start;
+                }
+
+                > .property__values > dd,
+                .property__details--grid > .property__values > dd {
+                    margin: 0;
+                    overflow-wrap: normal;
+                    white-space: nowrap;
+                    word-break: normal;
+                }
+            }
+        }
+    }
+
+    .resource-values-tabs {
+        .tabs ul {
+            border-bottom: 1px solid #dfdfdf;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            list-style: none;
+            margin: 0 auto 16px;
+            max-width: 100%;
+            padding: 0;
+        }
+
+        .tabs li {
+            margin-block-start: 0;
+            margin-block-end: -1px;
+            margin-inline-start: 0;
+            margin-inline-end: 12px;
+        }
+
+        .tabs li a {
+            border: 0;
+            border-bottom: 3px solid transparent;
+            color: #676767;
+            display: inline-flex;
+            justify-content: center;
+            min-width: 180px;
+            padding: 8px 18px;
+            text-decoration: none;
+            transition: color .2s ease, border-color .2s ease;
+        }
+
+        .tabs li.is-active a {
+            border-bottom-color: var(--secondary, #2B7F8B);
+            color: var(--secondary, #2B7F8B);
+            font-weight: 600;
+        }
+
+        .tabs li a:hover {
+            color: var(--secondary, #2B7F8B);
         }
     }
 
