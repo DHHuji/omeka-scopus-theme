@@ -10,6 +10,7 @@ $bannerHeightProperty = $bannerHeading || $bannerDescription ? 'min-height' : 'h
 $primaryColor = $this->themeSetting('primary_color') ?? '#5CB99A';
 $secondaryColor = $this->themeSetting('secondary_color') ?? '#2B7F8B';
 $accentColor = $this->themeSetting('accent_color') ?? '#01544B';
+$displayImageTermsOfUse = (bool) $this->themeSetting('display_image_terms_of_use');
 
 $this->htmlElement('html')->setAttribute('lang', $this->lang());
 $this->htmlElement('html')->setAttribute('dir', $this->themeSetting('layout_direction') ?? 'ltr');
@@ -74,6 +75,178 @@ if ($userBar) {
 		</div>
 
 		<?php echo $this->partial('common/footer'); ?>
+
+		<?php if ($displayImageTermsOfUse): ?>
+			<div id="copyright-modal" class="copyright-modal" hidden>
+				<div class="copyright-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="copyright-modal-title">
+					<h3 id="copyright-modal-title"><?php echo $this->translate('Terms of Use'); ?></h3>
+					<div class="copyright-modal__body">
+						<p><?php echo $this->translate('By downloading this image, you agree to the following terms:'); ?></p>
+						<ul>
+							<li><?php echo $this->translate('The image is provided for personal, educational, and non-commercial use only.'); ?></li>
+							<li><?php echo $this->translate('All copyrights and image rights belong to the respective museum or institution that owns the image or the depicted object.'); ?></li>
+							<li><?php echo $this->translate('Any commercial use, reproduction, or redistribution of this image is strictly prohibited without prior written permission from the copyright holder.'); ?></li>
+							<li><?php echo $this->translate('For inquiries regarding commercial use or licensing, please contact the museum or institution that holds the rights to the image.'); ?></li>
+						</ul>
+						<p class="copyright-modal__note"><?php echo $this->translate('By proceeding with the download, you confirm that you have read and agreed to these terms.'); ?></p>
+					</div>
+					<input type="hidden" id="pending-download-url" value="">
+					<div class="copyright-modal__actions">
+						<button type="button" id="btn-cancel"><?php echo $this->translate('Cancel'); ?></button>
+						<button type="button" id="btn-agree"><?php echo $this->translate('I Agree'); ?></button>
+					</div>
+				</div>
+			</div>
+
+			<style>
+				.copyright-modal {
+					position: fixed;
+					inset: 0;
+					z-index: 10000;
+					display: flex;
+					align-items: center;
+					justify-content: center;
+					padding: 5vh 1rem;
+					background: rgba(0, 0, 0, 0.7);
+				}
+
+				.copyright-modal[hidden] {
+					display: none;
+				}
+
+				.copyright-modal__dialog {
+					width: min(600px, 100%);
+					max-height: 90vh;
+					overflow-y: auto;
+					padding: 30px;
+					border-radius: 8px;
+					background: #fff;
+					box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+					color: #444;
+				}
+
+				.copyright-modal__dialog h3 {
+					margin-top: 0;
+					padding-bottom: 15px;
+					border-bottom: 1px solid #eee;
+					text-align: center;
+					color: #333;
+				}
+
+				.copyright-modal__body {
+					font-size: 15px;
+					line-height: 1.6;
+				}
+
+				.copyright-modal__body ul {
+					margin-bottom: 20px;
+				}
+
+				.copyright-modal__body li {
+					margin-bottom: 10px;
+				}
+
+				.copyright-modal__note {
+					padding: 10px;
+					border-radius: 4px;
+					background: #f9f9f9;
+					color: #666;
+					font-size: 14px;
+				}
+
+				.copyright-modal__actions {
+					display: flex;
+					justify-content: center;
+					gap: 15px;
+					margin-top: 25px;
+				}
+
+				#btn-cancel,
+				#btn-agree {
+					padding: 12px 20px;
+					border: 0;
+					border-radius: 4px;
+					font-weight: 700;
+					cursor: pointer;
+				}
+
+				#btn-cancel {
+					background: #e0e0e0;
+					color: #333;
+				}
+
+				#btn-agree {
+					background: #0056b3;
+					color: #fff;
+				}
+			</style>
+
+			<script>
+				document.addEventListener('DOMContentLoaded', function () {
+					var storageKey = 'omeka_copyright_agreed';
+					var modal = document.getElementById('copyright-modal');
+					var pendingUrlInput = document.getElementById('pending-download-url');
+					var agreeButton = document.getElementById('btn-agree');
+					var cancelButton = document.getElementById('btn-cancel');
+					var downloadSelector = 'a.media-download-link, a[href*="/files/original/"], .media-list a, .media-embeds a, .resource-list.media a';
+
+					if (!modal || !pendingUrlInput || !agreeButton || !cancelButton) {
+						return;
+					}
+
+					function openModal(url) {
+						pendingUrlInput.value = url;
+						modal.hidden = false;
+					}
+
+					function closeModal() {
+						modal.hidden = true;
+						pendingUrlInput.value = '';
+					}
+
+					document.addEventListener('click', function (event) {
+						var link = event.target.closest(downloadSelector);
+						if (!link || !link.href) {
+							return;
+						}
+
+						if (sessionStorage.getItem(storageKey) === 'true') {
+							return;
+						}
+
+						if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || link.target === '_blank' || link.hasAttribute('download')) {
+							return;
+						}
+
+						event.preventDefault();
+						openModal(link.href);
+					});
+
+					agreeButton.addEventListener('click', function () {
+						var targetUrl = pendingUrlInput.value;
+						sessionStorage.setItem(storageKey, 'true');
+						closeModal();
+						if (targetUrl) {
+							window.location.href = targetUrl;
+						}
+					});
+
+					cancelButton.addEventListener('click', closeModal);
+
+					modal.addEventListener('click', function (event) {
+						if (event.target === modal) {
+							closeModal();
+						}
+					});
+
+					document.addEventListener('keydown', function (event) {
+						if (event.key === 'Escape' && !modal.hidden) {
+							closeModal();
+						}
+					});
+				});
+			</script>
+		<?php endif; ?>
 
 		<?php
 		echo $this->inlineScript()
