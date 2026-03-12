@@ -60,8 +60,14 @@ $templateGroupDebug = [
     'template_found' => false,
     'template_class' => null,
     'template_label' => null,
+    'template_methods' => [],
+    'template_jsonld_keys' => [],
     'template_jsonld_group_keys_present' => [],
     'template_group_labels' => [],
+    'template_property_count' => 0,
+    'template_property_methods' => [],
+    'template_property_first_keys' => [],
+    'template_property_first_payload' => null,
     'template_property_group_labels' => [],
     'configured_tabs_source' => 'manual',
     'configured_tab_labels' => [],
@@ -148,9 +154,30 @@ $getTemplateGroupTabs = function ($resource) use ($extractGroupLabel, $appendTab
     $templateGroupDebug['template_found'] = true;
     $templateGroupDebug['template_class'] = get_class($template);
     $templateGroupDebug['template_label'] = method_exists($template, 'label') ? $template->label() : null;
+    $templateGroupDebug['template_methods'] = get_class_methods($template);
 
     $templateData = method_exists($template, 'jsonSerialize') ? $template->jsonSerialize() : [];
+    if (is_array($templateData)) {
+        $templateGroupDebug['template_jsonld_keys'] = array_keys($templateData);
+    }
     $tabsByLabel = [];
+
+    if (!empty($templateData['o:data']['groups']) && is_array($templateData['o:data']['groups'])) {
+        $templateGroupDebug['template_jsonld_group_keys_present'][] = 'o:data.groups';
+        foreach ($templateData['o:data']['groups'] as $label => $properties) {
+            $label = $extractGroupLabel($label);
+            if ($label === null) {
+                continue;
+            }
+            $templateGroupDebug['template_group_labels'][] = $label;
+            if (!is_array($properties)) {
+                continue;
+            }
+            foreach ($properties as $propertyData) {
+                $appendTabPropertyIdentifiers($tabsByLabel, $label, $propertyData);
+            }
+        }
+    }
 
     foreach (['o:property_groups', 'property_groups', 'o:groups', 'groups'] as $key) {
         if (empty($templateData[$key]) || !is_array($templateData[$key])) {
@@ -182,11 +209,22 @@ $getTemplateGroupTabs = function ($resource) use ($extractGroupLabel, $appendTab
         return [];
     }
 
-    foreach ($template->resourceTemplateProperties() as $templateProperty) {
+    $templateProperties = $template->resourceTemplateProperties();
+    if (is_array($templateProperties) || $templateProperties instanceof Countable) {
+        $templateGroupDebug['template_property_count'] = count($templateProperties);
+    }
+    foreach ($templateProperties as $templateProperty) {
         if (!is_object($templateProperty) || !method_exists($templateProperty, 'jsonSerialize')) {
             continue;
         }
+        if (!$templateGroupDebug['template_property_methods']) {
+            $templateGroupDebug['template_property_methods'] = get_class_methods($templateProperty);
+        }
         $templatePropertyData = $templateProperty->jsonSerialize();
+        if (!$templateGroupDebug['template_property_first_keys'] && is_array($templatePropertyData)) {
+            $templateGroupDebug['template_property_first_keys'] = array_keys($templatePropertyData);
+            $templateGroupDebug['template_property_first_payload'] = $templatePropertyData;
+        }
         $label = null;
         foreach (['o:property_group', 'property_group', 'o:group', 'group'] as $groupKey) {
             if (empty($templatePropertyData[$groupKey])) {
