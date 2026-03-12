@@ -52,26 +52,6 @@ $normalizePropertySelectValues = function ($raw) {
 
 $tabsMode = (string) $this->themeSetting('resource_page_values_mode', 'default');
 $useTemplateGroups = (bool) $this->themeSetting('resource_page_use_template_groups', false);
-$templateGroupDebug = [
-    'tabs_mode' => $tabsMode,
-    'use_template_groups' => $useTemplateGroups,
-    'resource_is_set' => isset($resource),
-    'resource_class' => isset($resource) && is_object($resource) ? get_class($resource) : null,
-    'template_found' => false,
-    'template_class' => null,
-    'template_label' => null,
-    'template_methods' => [],
-    'template_jsonld_keys' => [],
-    'template_jsonld_group_keys_present' => [],
-    'template_group_labels' => [],
-    'template_property_count' => 0,
-    'template_property_methods' => [],
-    'template_property_first_keys' => [],
-    'template_property_first_payload' => null,
-    'template_property_group_labels' => [],
-    'configured_tabs_source' => 'manual',
-    'configured_tab_labels' => [],
-];
 
 $extractPropertyIdentifiers = function ($propertyData) {
     $identifiers = [];
@@ -143,7 +123,7 @@ $appendTabPropertyIdentifiers = function (&$tabsByLabel, $label, $propertyData) 
     }
 };
 
-$getTemplateGroupTabs = function ($resource) use ($extractGroupLabel, $appendTabPropertyIdentifiers, &$templateGroupDebug) {
+$getTemplateGroupTabs = function ($resource) use ($extractGroupLabel, $appendTabPropertyIdentifiers) {
     if (!isset($resource) || !is_object($resource) || !method_exists($resource, 'resourceTemplate')) {
         return [];
     }
@@ -151,25 +131,16 @@ $getTemplateGroupTabs = function ($resource) use ($extractGroupLabel, $appendTab
     if (!$template || !is_object($template)) {
         return [];
     }
-    $templateGroupDebug['template_found'] = true;
-    $templateGroupDebug['template_class'] = get_class($template);
-    $templateGroupDebug['template_label'] = method_exists($template, 'label') ? $template->label() : null;
-    $templateGroupDebug['template_methods'] = get_class_methods($template);
 
     $templateData = method_exists($template, 'jsonSerialize') ? $template->jsonSerialize() : [];
-    if (is_array($templateData)) {
-        $templateGroupDebug['template_jsonld_keys'] = array_keys($templateData);
-    }
     $tabsByLabel = [];
 
     if (!empty($templateData['o:data']['groups']) && is_array($templateData['o:data']['groups'])) {
-        $templateGroupDebug['template_jsonld_group_keys_present'][] = 'o:data.groups';
         foreach ($templateData['o:data']['groups'] as $label => $properties) {
             $label = $extractGroupLabel($label);
             if ($label === null) {
                 continue;
             }
-            $templateGroupDebug['template_group_labels'][] = $label;
             if (!is_array($properties)) {
                 continue;
             }
@@ -183,13 +154,11 @@ $getTemplateGroupTabs = function ($resource) use ($extractGroupLabel, $appendTab
         if (empty($templateData[$key]) || !is_array($templateData[$key])) {
             continue;
         }
-        $templateGroupDebug['template_jsonld_group_keys_present'][] = $key;
         foreach ($templateData[$key] as $groupData) {
             $label = $extractGroupLabel($groupData);
             if ($label === null) {
                 continue;
             }
-            $templateGroupDebug['template_group_labels'][] = $label;
             foreach (['o:resource_template_property', 'resource_template_properties', 'o:properties', 'properties'] as $propertiesKey) {
                 if (empty($groupData[$propertiesKey]) || !is_array($groupData[$propertiesKey])) {
                     continue;
@@ -209,22 +178,11 @@ $getTemplateGroupTabs = function ($resource) use ($extractGroupLabel, $appendTab
         return [];
     }
 
-    $templateProperties = $template->resourceTemplateProperties();
-    if (is_array($templateProperties) || $templateProperties instanceof Countable) {
-        $templateGroupDebug['template_property_count'] = count($templateProperties);
-    }
-    foreach ($templateProperties as $templateProperty) {
+    foreach ($template->resourceTemplateProperties() as $templateProperty) {
         if (!is_object($templateProperty) || !method_exists($templateProperty, 'jsonSerialize')) {
             continue;
         }
-        if (!$templateGroupDebug['template_property_methods']) {
-            $templateGroupDebug['template_property_methods'] = get_class_methods($templateProperty);
-        }
         $templatePropertyData = $templateProperty->jsonSerialize();
-        if (!$templateGroupDebug['template_property_first_keys'] && is_array($templatePropertyData)) {
-            $templateGroupDebug['template_property_first_keys'] = array_keys($templatePropertyData);
-            $templateGroupDebug['template_property_first_payload'] = $templatePropertyData;
-        }
         $label = null;
         foreach (['o:property_group', 'property_group', 'o:group', 'group'] as $groupKey) {
             if (empty($templatePropertyData[$groupKey])) {
@@ -238,7 +196,6 @@ $getTemplateGroupTabs = function ($resource) use ($extractGroupLabel, $appendTab
         if ($label === null) {
             continue;
         }
-        $templateGroupDebug['template_property_group_labels'][] = $label;
         if (empty($templatePropertyData['o:property'])) {
             continue;
         }
@@ -251,9 +208,6 @@ $getTemplateGroupTabs = function ($resource) use ($extractGroupLabel, $appendTab
 $configuredTabs = [];
 if ($useTemplateGroups && isset($resource)) {
     $configuredTabs = $getTemplateGroupTabs($resource);
-    if ($configuredTabs) {
-        $templateGroupDebug['configured_tabs_source'] = 'template_groups';
-    }
 }
 if (!$configuredTabs) {
     for ($i = 1; $i <= 6; $i++) {
@@ -272,9 +226,6 @@ if (!$configuredTabs) {
         ];
     }
 }
-$templateGroupDebug['configured_tab_labels'] = array_values(array_map(function ($tab) {
-    return $tab['label'];
-}, $configuredTabs));
 $useTabs = $tabsMode === 'tabs' && count($configuredTabs) >= 2;
 
 $renderProperty = function ($term, $propertyData) use (
@@ -374,10 +325,6 @@ $renderProperty = function ($term, $propertyData) use (
     <?php
 };
 ?>
-
-<div style="background:#fff3cd;border:1px solid #d6b656;color:#4a3b00;padding:12px;margin:0 0 16px;font:12px/1.4 monospace;white-space:pre-wrap;">
-<?php echo $escape(json_encode($templateGroupDebug, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)); ?>
-</div>
 
 <?php if (!$useTabs): ?>
 <dl>
