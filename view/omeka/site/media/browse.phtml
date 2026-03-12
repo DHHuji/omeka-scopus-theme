@@ -67,7 +67,7 @@ if (is_array($decoration) && in_array('media', $decoration)) {
             <?php if ($primaryMedia): ?>
                 <div class="resource__thumbnail <?php echo $decorationClass; ?>">
                     <?php $altText = $primaryMedia->altText() ?: $primaryMedia->displayTitle() ?: ''; ?>
-                    <?php echo $media->linkRaw($this->thumbnail($primaryMedia, 'large', ['alt' => $altText])); ?>
+                    <?php echo $media->linkRaw($this->thumbnail($primaryMedia, 'large', ['alt' => $altText]), null, ['target' => '_blank', 'rel' => 'noopener']); ?>
                 </div>
             <?php endif; ?>
 
@@ -76,7 +76,7 @@ if (is_array($decoration) && in_array('media', $decoration)) {
                 <?php echo $this->ResourceTags($media); ?>
                 <!-- Metadata -->
                 <div class="resource__meta <?php echo ($isGrid) ? '' : 'media-object-section'; ?>">
-                    <?php echo $media->link($media->displayTitle(null, $valueLang)); ?>
+                    <?php echo $media->link($media->displayTitle(null, $valueLang), null, ['target' => '_blank', 'rel' => 'noopener']); ?>
                     <?php if ($body): ?>
                         <div class="description <?php echo ($bodyTruncate) ? $bodyTruncate : ''; ?>"><?php echo $escape($body); ?></div>
                     <?php endif; ?>

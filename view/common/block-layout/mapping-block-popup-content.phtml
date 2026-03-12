@@ -16,7 +16,7 @@ $media = $marker->media();
     <?php endif; ?>
     <?php if ($media) : ?>
         <div>
-            <?php echo sprintf($this->translate('Media: %s'), $media->link($media->displayTitle(), null, ['target' => '_blank'])); ?>
+            <?php echo sprintf($this->translate('Media: %s'), $media->link($media->displayTitle(), null, ['target' => '_blank', 'rel' => 'noopener'])); ?>
         </div>
     <?php endif; ?>
 </div>

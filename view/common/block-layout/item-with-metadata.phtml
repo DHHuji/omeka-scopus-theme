@@ -81,7 +81,7 @@ $decoration = $this->themeSetting('image_decoration');
                                     );
                                     ?>
                                     <dd class="value <?php echo is_array($decoration) && in_array('media', $decoration) ? 'decoration decoration--thumbnail' : ''; ?>">
-                                        <?php echo $media->linkRaw($linkContent, null, ['class' => 'resource-link']); ?>
+                                        <?php echo $media->linkRaw($linkContent, null, ['class' => 'resource-link', 'target' => '_blank', 'rel' => 'noopener']); ?>
                                     </dd>
                                 <?php endforeach; ?>
                             </div>
