@@ -17,11 +17,33 @@ $leftSidebarHasBlocks = $leftSidebarBlockContent->hasBlocks();
 $rightSidebarBlockContent = $this->resourcePageBlocks($item, 'right');
 $rightSidebarHasBlocks = $rightSidebarBlockContent->hasBlocks();
 
-$rightsVals = (array) $item->value('dcterms:rights', ['all' => true, 'type' => 'literal']);
-$accessVals = (array) $item->value('dcterms:accessRights', ['all' => true, 'type' => 'literal']);
-$allTexts = array_filter(array_map('strval', array_merge($rightsVals, $accessVals)));
+$extractValueTexts = function (array $values) {
+    $texts = [];
+    foreach ($values as $value) {
+        if (is_object($value) && method_exists($value, 'value')) {
+            $text = $value->value();
+        } else {
+            $text = (string) $value;
+        }
+        $text = trim((string) $text);
+        if ($text !== '') {
+            $texts[] = $text;
+        }
+    }
+    return $texts;
+};
+$rightsVals = $extractValueTexts((array) $item->values('dcterms:rights'));
+$accessVals = $extractValueTexts((array) $item->values('dcterms:accessRights'));
+$allTexts = array_merge($rightsVals, $accessVals);
 $rightsText = mb_strtolower(implode(' ', $allTexts));
 $requiresPopup = ($rightsText !== '' && mb_strpos($rightsText, 'restricted') !== false);
+$popupDebug = [
+    'itemId' => (int) $item->id(),
+    'rightsValues' => $rightsVals,
+    'accessRightsValues' => $accessVals,
+    'combinedText' => $rightsText,
+    'requiresPopup' => $requiresPopup,
+];
 ?>
 
 <?php echo $this->ResourceTags($item); ?>
@@ -94,14 +116,23 @@ $requiresPopup = ($rightsText !== '' && mb_strpos($rightsText, 'restricted') !==
             var pendingDownloadUrl = document.getElementById('pendingDownloadUrl');
             var storageKey = 'omeka_copyright_agreed_item_<?php echo (int) $item->id(); ?>';
             var downloadSelector = 'a.media-download-link, a[href*="/files/original/"], .media-list a, .media-embeds a, .resource-list.media a';
+            var debugInfo = <?php echo json_encode($popupDebug, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE); ?>;
 
             if (!popup || !agreeButton || !cancelButton || !pendingDownloadUrl) {
+                console.warn('[Scopus terms debug] Required popup elements are missing.', debugInfo);
                 return;
             }
+
+            console.info('[Scopus terms debug] Restricted item detected.', debugInfo);
+            console.info('[Scopus terms debug] Matching links found on page:', document.querySelectorAll(downloadSelector).length);
 
             function openPopup(url) {
                 pendingDownloadUrl.value = url || '';
                 popup.hidden = false;
+                console.info('[Scopus terms debug] Opening popup.', {
+                    pendingDownloadUrl: pendingDownloadUrl.value,
+                    storageKey: storageKey
+                });
             }
 
             function closePopup() {
@@ -111,6 +142,10 @@ $requiresPopup = ($rightsText !== '' && mb_strpos($rightsText, 'restricted') !==
 
             if (sessionStorage.getItem(storageKey) !== 'true') {
                 openPopup();
+            } else {
+                console.info('[Scopus terms debug] Popup already accepted for this item in sessionStorage.', {
+                    storageKey: storageKey
+                });
             }
 
             agreeButton.addEventListener('click', function () {
@@ -118,6 +153,10 @@ $requiresPopup = ($rightsText !== '' && mb_strpos($rightsText, 'restricted') !==
 
                 sessionStorage.setItem(storageKey, 'true');
                 closePopup();
+                console.info('[Scopus terms debug] User agreed to terms.', {
+                    storageKey: storageKey,
+                    targetUrl: targetUrl
+                });
 
                 if (targetUrl) {
                     window.location.href = targetUrl;
@@ -125,6 +164,7 @@ $requiresPopup = ($rightsText !== '' && mb_strpos($rightsText, 'restricted') !==
             });
 
             cancelButton.addEventListener('click', function () {
+                console.info('[Scopus terms debug] User canceled terms popup.');
                 if (window.history.length > 1) {
                     window.history.back();
                     return;
@@ -139,11 +179,27 @@ $requiresPopup = ($rightsText !== '' && mb_strpos($rightsText, 'restricted') !==
                     return;
                 }
 
+                console.info('[Scopus terms debug] Matching link clicked.', {
+                    href: link.href,
+                    text: (link.textContent || '').trim(),
+                    className: link.className || ''
+                });
+
                 if (sessionStorage.getItem(storageKey) === 'true') {
+                    console.info('[Scopus terms debug] Allowing click because terms were already accepted.', {
+                        storageKey: storageKey
+                    });
                     return;
                 }
 
                 if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || link.target === '_blank') {
+                    console.info('[Scopus terms debug] Not intercepting click due to modifier key or _blank target.', {
+                        metaKey: event.metaKey,
+                        ctrlKey: event.ctrlKey,
+                        shiftKey: event.shiftKey,
+                        altKey: event.altKey,
+                        target: link.target || ''
+                    });
                     return;
                 }
 
@@ -210,4 +266,12 @@ $requiresPopup = ($rightsText !== '' && mb_strpos($rightsText, 'restricted') !==
             background-color: #999;
         }
     </style>
+<?php endif; ?>
+
+<?php if (!$requiresPopup): ?>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            console.info('[Scopus terms debug] Popup not enabled for this item.', <?php echo json_encode($popupDebug, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE); ?>);
+        });
+    </script>
 <?php endif; ?>
