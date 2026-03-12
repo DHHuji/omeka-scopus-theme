@@ -262,17 +262,28 @@ $renderProperty = function ($term, $propertyData) use (
         ? $collapsibleMap[$term]
         : (array_key_exists($propertyId, $collapsibleMap) ? $collapsibleMap[$propertyId] : false);
     ?>
-    <div class="property<?php if ($isCollapsible) echo ' collapsible-property'; ?>">
+    <div
+        class="property<?php if ($isCollapsible) echo ' collapsible-property'; ?>"
+        data-property-label="<?php echo $escape($propertyLabel); ?>"
+        data-property-term="<?php echo $escape($property->term()); ?>"
+        data-property-id="<?php echo $escape($propertyId); ?>"
+    >
         <?php if ($isCollapsible): ?>
         <details<?php if ($isOpen) echo ' open'; ?>>
-            <summary>
+            <summary
+                data-property-label="<?php echo $escape($propertyLabel); ?>"
+                data-property-term="<?php echo $escape($property->term()); ?>"
+            >
             <?php echo $escape($propertyLabel); ?>
             <?php if ($propertyTerm !== null) : ?>
             <span class="field-term">(<?php echo $escape($propertyTerm); ?>)</span>
             <?php endif; ?>
             </summary>
         <?php else: ?>
-        <dt>
+        <dt
+            data-property-label="<?php echo $escape($propertyLabel); ?>"
+            data-property-term="<?php echo $escape($property->term()); ?>"
+        >
         <?php echo $escape($propertyLabel); ?>
         <?php if ($propertyTerm !== null) : ?>
         <span class="field-term">(<?php echo $escape($propertyTerm); ?>)</span>
