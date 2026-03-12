@@ -17,19 +17,42 @@ $leftSidebarHasBlocks = $leftSidebarBlockContent->hasBlocks();
 $rightSidebarBlockContent = $this->resourcePageBlocks($item, 'right');
 $rightSidebarHasBlocks = $rightSidebarBlockContent->hasBlocks();
 
-$extractValueTexts = function (array $values) {
+$extractValueTexts = function ($value) use (&$extractValueTexts) {
     $texts = [];
-    foreach ($values as $value) {
-        if (is_object($value) && method_exists($value, 'value')) {
-            $text = $value->value();
-        } else {
-            $text = (string) $value;
+
+    if (is_array($value)) {
+        foreach ($value as $entry) {
+            $texts = array_merge($texts, $extractValueTexts($entry));
         }
-        $text = trim((string) $text);
+        return $texts;
+    }
+
+    if (is_object($value)) {
+        if (method_exists($value, 'value')) {
+            $text = trim((string) $value->value());
+            if ($text !== '') {
+                $texts[] = $text;
+            }
+            return $texts;
+        }
+
+        if (method_exists($value, '__toString')) {
+            $text = trim((string) $value);
+            if ($text !== '') {
+                $texts[] = $text;
+            }
+        }
+
+        return $texts;
+    }
+
+    if (is_string($value) || is_numeric($value)) {
+        $text = trim((string) $value);
         if ($text !== '') {
             $texts[] = $text;
         }
     }
+
     return $texts;
 };
 $rightsVals = $extractValueTexts((array) $item->values('dcterms:rights'));
