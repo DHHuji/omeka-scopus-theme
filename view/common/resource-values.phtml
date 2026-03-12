@@ -228,6 +228,55 @@ if (!$configuredTabs) {
 }
 $useTabs = $tabsMode === 'tabs' && count($configuredTabs) >= 2;
 
+$propertyColorMaps = [
+    '38' => [
+        'beige' => '#F5F5DC',
+        'black' => '#000000',
+        'blue' => '#0000FF',
+        'bright blue' => '#0096FF',
+        'bright red' => '#FF0000',
+        'brown' => '#8B4513',
+        'buff' => '#F0DC82',
+        'cyan' => '#00FFFF',
+        'dark' => '#2F2F2F',
+        'dark blue' => '#00008B',
+        'dark brown' => '#654321',
+        'dark gray' => '#A9A9A9',
+        'dark grey' => '#A9A9A9',
+        'dark pale' => '#CFCFC4',
+        'dark pink' => '#C71585',
+        'dark red' => '#8B0000',
+        'dark-red' => '#8B0000',
+        'gold' => '#FFD700',
+        'golden' => '#FFD700',
+        'gray' => '#808080',
+        'green' => '#008000',
+        'grey' => '#808080',
+        'light blue' => '#ADD8E6',
+        'light brown' => '#C4A484',
+        'light gray' => '#D3D3D3',
+        'light grey' => '#D3D3D3',
+        'light pink' => '#FFB6C1',
+        'light red' => '#FF7F7F',
+        'light yellow' => '#FFFFE0',
+        'maroon' => '#800000',
+        'ochre' => '#CC7722',
+        'orange' => '#FFA500',
+        'orange-red' => '#FF4500',
+        'organge' => '#FFA500',
+        'pale' => '#F2F2E6',
+        'pale yellow' => '#FFFF99',
+        'pink' => '#FFC0CB',
+        'purple' => '#800080',
+        'red' => '#FF0000',
+        'sky blue' => '#87CEEB',
+        'whate' => '#FFFFFF',
+        'white' => '#FFFFFF',
+        'white (background)' => '#FFFFFF',
+        'yellow' => '#FFFF00',
+    ],
+];
+
 $renderProperty = function ($term, $propertyData) use (
     $filterLocale,
     $filterLocaleCallback,
@@ -238,7 +287,8 @@ $renderProperty = function ($term, $propertyData) use (
     $showLocale,
     $showValueAnnotations,
     $decoration,
-    $lang
+    $lang,
+    $propertyColorMaps
 ) {
     $propertyValues = $propertyData['values'];
     if ($filterLocale) {
@@ -295,6 +345,10 @@ $renderProperty = function ($term, $propertyData) use (
             $valueType = $value->type();
             $valueLang = $value->lang();
             $valueAnnotation = $value->valueAnnotation();
+            $valueText = trim((string) $value->value());
+            $normalizedValueText = mb_strtolower($valueText);
+            $colorMap = $propertyColorMaps[$propertyId] ?? null;
+            $valueColor = $colorMap[$normalizedValueText] ?? null;
             $class = ['value'];
             if ('resource' == $valueType || strpos($valueType, 'resource') !== false) {
                 $class[] = 'resource';
@@ -310,6 +364,13 @@ $renderProperty = function ($term, $propertyData) use (
             <dd class="<?php echo implode(' ', $class); ?>" lang="<?php echo $escape($valueLang); ?>">
                 <?php if ($showLocale && $valueLang) : ?>
                     <span class="language"><?php echo $valueLang; ?></span>
+                <?php endif; ?>
+                <?php if ($valueColor !== null) : ?>
+                    <span
+                        class="value-color-marker"
+                        aria-hidden="true"
+                        style="background-color: <?php echo $escape($valueColor); ?>;"
+                    ></span>
                 <?php endif; ?>
                 <span class="value-content"><?php echo $filterLocale ? $value->asHtml($lang) : $value->asHtml(); ?></span>
                 <?php if(!$value->isPublic()) : ?>
@@ -336,6 +397,17 @@ $renderProperty = function ($term, $propertyData) use (
     <?php
 };
 ?>
+<style>
+.value-color-marker {
+    border: 1px solid #000;
+    border-radius: 999px;
+    display: inline-block;
+    height: .85em;
+    margin-inline-end: .45em;
+    vertical-align: -.05em;
+    width: .85em;
+}
+</style>
 
 <?php if (!$useTabs): ?>
 <dl>
