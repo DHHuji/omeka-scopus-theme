@@ -51,21 +51,165 @@ $normalizePropertySelectValues = function ($raw) {
 };
 
 $tabsMode = (string) $this->themeSetting('resource_page_values_mode', 'default');
+$useTemplateGroups = (bool) $this->themeSetting('resource_page_use_template_groups', false);
+
+$extractPropertyIdentifiers = function ($propertyData) {
+    $identifiers = [];
+    if (is_scalar($propertyData)) {
+        $value = trim((string) $propertyData);
+        if ($value !== '') {
+            $identifiers[$value] = true;
+        }
+        return $identifiers;
+    }
+    if (!is_array($propertyData)) {
+        return $identifiers;
+    }
+    foreach (['o:id', 'id', 'o:term', 'term', '@id'] as $key) {
+        if (!isset($propertyData[$key])) {
+            continue;
+        }
+        $value = trim((string) $propertyData[$key]);
+        if ($value !== '') {
+            $identifiers[$value] = true;
+        }
+    }
+    foreach (['o:property', 'property'] as $key) {
+        if (empty($propertyData[$key]) || !is_array($propertyData[$key])) {
+            continue;
+        }
+        foreach ($propertyData[$key] as $valueKey => $value) {
+            if (!in_array($valueKey, ['o:id', 'id', 'o:term', 'term', '@id'], true)) {
+                continue;
+            }
+            $value = trim((string) $value);
+            if ($value !== '') {
+                $identifiers[$value] = true;
+            }
+        }
+    }
+    return $identifiers;
+};
+
+$extractGroupLabel = function ($groupData) {
+    if (is_scalar($groupData)) {
+        $label = trim((string) $groupData);
+        return $label !== '' ? $label : null;
+    }
+    if (!is_array($groupData)) {
+        return null;
+    }
+    foreach (['o:label', 'label', 'o:name', 'name', 'o:title', 'title', 'group', 'o:group'] as $key) {
+        if (!isset($groupData[$key])) {
+            continue;
+        }
+        $label = trim((string) $groupData[$key]);
+        if ($label !== '') {
+            return $label;
+        }
+    }
+    return null;
+};
+
+$appendTabPropertyIdentifiers = function (&$tabsByLabel, $label, $propertyData) use ($extractPropertyIdentifiers) {
+    if (!isset($tabsByLabel[$label])) {
+        $tabsByLabel[$label] = [
+            'label' => $label,
+            'properties' => [],
+        ];
+    }
+    foreach ($extractPropertyIdentifiers($propertyData) as $identifier => $isEnabled) {
+        $tabsByLabel[$label]['properties'][$identifier] = $isEnabled;
+    }
+};
+
+$getTemplateGroupTabs = function ($resource) use ($extractGroupLabel, $appendTabPropertyIdentifiers) {
+    if (!isset($resource) || !is_object($resource) || !method_exists($resource, 'resourceTemplate')) {
+        return [];
+    }
+    $template = $resource->resourceTemplate();
+    if (!$template || !is_object($template)) {
+        return [];
+    }
+
+    $templateData = method_exists($template, 'jsonSerialize') ? $template->jsonSerialize() : [];
+    $tabsByLabel = [];
+
+    foreach (['o:property_groups', 'property_groups', 'o:groups', 'groups'] as $key) {
+        if (empty($templateData[$key]) || !is_array($templateData[$key])) {
+            continue;
+        }
+        foreach ($templateData[$key] as $groupData) {
+            $label = $extractGroupLabel($groupData);
+            if ($label === null) {
+                continue;
+            }
+            foreach (['o:resource_template_property', 'resource_template_properties', 'o:properties', 'properties'] as $propertiesKey) {
+                if (empty($groupData[$propertiesKey]) || !is_array($groupData[$propertiesKey])) {
+                    continue;
+                }
+                foreach ($groupData[$propertiesKey] as $propertyData) {
+                    $appendTabPropertyIdentifiers($tabsByLabel, $label, $propertyData);
+                }
+            }
+        }
+    }
+
+    if ($tabsByLabel) {
+        return array_values($tabsByLabel);
+    }
+
+    if (!method_exists($template, 'resourceTemplateProperties')) {
+        return [];
+    }
+
+    foreach ($template->resourceTemplateProperties() as $templateProperty) {
+        if (!is_object($templateProperty) || !method_exists($templateProperty, 'jsonSerialize')) {
+            continue;
+        }
+        $templatePropertyData = $templateProperty->jsonSerialize();
+        $label = null;
+        foreach (['o:property_group', 'property_group', 'o:group', 'group'] as $groupKey) {
+            if (empty($templatePropertyData[$groupKey])) {
+                continue;
+            }
+            $label = $extractGroupLabel($templatePropertyData[$groupKey]);
+            if ($label !== null) {
+                break;
+            }
+        }
+        if ($label === null) {
+            continue;
+        }
+        if (empty($templatePropertyData['o:property'])) {
+            continue;
+        }
+        $appendTabPropertyIdentifiers($tabsByLabel, $label, $templatePropertyData['o:property']);
+    }
+
+    return array_values($tabsByLabel);
+};
+
 $configuredTabs = [];
-for ($i = 1; $i <= 6; $i++) {
-    $label = trim((string) $this->themeSetting(sprintf('resource_page_tab_%d_name', $i), ''));
-    if ($label === '') {
-        continue;
+if ($useTemplateGroups && isset($resource)) {
+    $configuredTabs = $getTemplateGroupTabs($resource);
+}
+if (!$configuredTabs) {
+    for ($i = 1; $i <= 6; $i++) {
+        $label = trim((string) $this->themeSetting(sprintf('resource_page_tab_%d_name', $i), ''));
+        if ($label === '') {
+            continue;
+        }
+        $propertiesRaw = $this->themeSetting(sprintf('resource_page_tab_%d_properties', $i));
+        $propertyMap = [];
+        foreach ($normalizePropertySelectValues($propertiesRaw) as $property) {
+            $propertyMap[(string) $property] = true;
+        }
+        $configuredTabs[] = [
+            'label' => $label,
+            'properties' => $propertyMap,
+        ];
     }
-    $propertiesRaw = $this->themeSetting(sprintf('resource_page_tab_%d_properties', $i));
-    $propertyMap = [];
-    foreach ($normalizePropertySelectValues($propertiesRaw) as $property) {
-        $propertyMap[(string) $property] = true;
-    }
-    $configuredTabs[] = [
-        'label' => $label,
-        'properties' => $propertyMap,
-    ];
 }
 $useTabs = $tabsMode === 'tabs' && count($configuredTabs) >= 2;
 
