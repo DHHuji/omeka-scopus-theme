@@ -160,16 +160,19 @@
                     display: grid;
                     gap: .5rem 1rem;
                     grid-column: 2;
-                    grid-template-columns: repeat(auto-fit, minmax(120px, max-content));
+                    grid-template-columns: repeat(auto-fit, minmax(min(14rem, 100%), max-content));
                     justify-content: start;
+                    max-width: 100%;
                 }
 
                 > .property__values > dd,
                 .property__details--grid > .property__values > dd {
                     margin: 0;
-                    overflow-wrap: normal;
-                    white-space: nowrap;
-                    word-break: normal;
+                    max-width: 100%;
+                    min-width: 0;
+                    overflow-wrap: anywhere;
+                    white-space: normal;
+                    word-break: break-word;
                 }
             }
         }
