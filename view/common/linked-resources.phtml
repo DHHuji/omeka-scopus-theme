@@ -14,6 +14,8 @@ if ($this->status()->isSiteRequest()) {
     $valueLang = $filterLocale ? [$lang, ''] : null;
 }
 
+$defaultThumbnailAsset = $this->themeSettingAsset('default_thumbnail');
+
 // Set up resource property select.
 $labelMap = [
     'items' => 'Items', // @translate
@@ -100,6 +102,9 @@ $headingTerm = $this->siteSetting('browse_heading_property_term');
                 $media = ($resource instanceof \Omeka\Api\Representation\ItemRepresentation) ? ($resource->media()[0] ?? null) : null;
                 $altText = $media ? ($media->altText() ?: $resource->displayTitle()) : $resource->displayTitle();
                 $thumbnail = $this->thumbnail($resource, 'square', ['alt' => $altText]);
+                if (!$thumbnail && $defaultThumbnailAsset) {
+                    $thumbnail = $this->thumbnail($defaultThumbnailAsset, 'square', ['alt' => $altText]);
+                }
                 ?>
 
                 <div class="linked-resource">
