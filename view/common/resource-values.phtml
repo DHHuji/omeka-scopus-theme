@@ -365,12 +365,31 @@ foreach ($values as $term => $propertyData) {
     }
     $tabBuckets[$tabIndex][$term] = $propertyData;
 }
+$renderedTabs = [];
+foreach ($configuredTabs as $index => $tab) {
+    if (!$tabBuckets[$index]) {
+        continue;
+    }
+    $renderedTabs[] = [
+        'label' => $tab['label'],
+        'properties' => $tab['properties'],
+        'bucket' => $tabBuckets[$index],
+    ];
+}
+$useRenderedTabs = count($renderedTabs) >= 2;
 $tabsComponentId = 'resource-values-tabs-' . substr(md5(uniqid((string) mt_rand(), true)), 0, 8);
 ?>
+<?php if (!$useRenderedTabs): ?>
+<dl>
+    <?php foreach ($values as $term => $propertyData): ?>
+        <?php $renderProperty($term, $propertyData); ?>
+    <?php endforeach; ?>
+</dl>
+<?php else: ?>
 <div class="resource-values-tabs" data-resource-values-tabs id="<?php echo $escape($tabsComponentId); ?>">
     <div class="tabs is-toggle">
         <ul role="tablist">
-            <?php foreach ($configuredTabs as $index => $tab): ?>
+            <?php foreach ($renderedTabs as $index => $tab): ?>
             <li class="<?php echo $index === 0 ? 'is-active' : ''; ?>">
                 <a
                     href="#<?php echo $escape($tabsComponentId . '-panel-' . $index); ?>"
@@ -384,14 +403,14 @@ $tabsComponentId = 'resource-values-tabs-' . substr(md5(uniqid((string) mt_rand(
             <?php endforeach; ?>
         </ul>
     </div>
-    <?php foreach ($configuredTabs as $index => $tab): ?>
+    <?php foreach ($renderedTabs as $index => $tab): ?>
     <div
         id="<?php echo $escape($tabsComponentId . '-panel-' . $index); ?>"
         class="resource-values-tabs__panel"
         style="<?php echo $index === 0 ? '' : 'display: none;'; ?>"
     >
         <dl>
-            <?php foreach ($tabBuckets[$index] as $term => $propertyData): ?>
+            <?php foreach ($tab['bucket'] as $term => $propertyData): ?>
                 <?php $renderProperty($term, $propertyData); ?>
             <?php endforeach; ?>
         </dl>
@@ -428,4 +447,5 @@ if (!window.ScopusResourceValueTabsInitialized) {
     });
 }
 </script>
+<?php endif; ?>
 <?php endif; ?>
