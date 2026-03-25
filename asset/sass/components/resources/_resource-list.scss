@@ -16,10 +16,6 @@
         }
 
         &__thumbnail {
-            align-self: center;
-            display: flex;
-            align-items: center;
-            justify-content: center;
             flex-shrink: 0;
             line-height: 1;
             margin: 15px 15px 15px auto;
@@ -28,7 +24,6 @@
             img {
                 height: 100px;
                 object-fit: cover;
-                object-position: center;
                 width: 100px;
             }
         }
