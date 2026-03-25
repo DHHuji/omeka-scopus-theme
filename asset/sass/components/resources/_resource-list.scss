@@ -25,6 +25,14 @@
             margin: 15px 15px 15px auto;
             order: 1;
 
+            a {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                height: 100%;
+                width: 100%;
+            }
+
             img {
                 height: 100px;
                 object-fit: cover;
