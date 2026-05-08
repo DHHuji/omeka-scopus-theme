@@ -71,11 +71,12 @@
   }
 
   .search-form-buttons {
+    height: 0;
     button {
       float: unset;
       position: relative;
       inset-inline-end: calc(-100vw + 13rem);
-      bottom: 3.5rem;
+      bottom: 5rem;
     }
   }
 
@@ -112,6 +113,15 @@
     border-radius: 10px;
     padding: 20px;
     box-shadow: 0 4px 12px rgba($color__black, 0.05);
+  }
+
+  fieldset {
+    padding: 1rem;
+    padding-bottom: 4rem;
+    margin: 0;
+    select {
+      min-height: 12rem;
+    }
   }
 
   /* Sidebar Title (Facets) */
