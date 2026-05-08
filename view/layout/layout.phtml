@@ -239,7 +239,9 @@ if ($userBar) {
 
 					function shouldInterceptLink(link) {
 						var href = link.href || '';
-						return link.matches('a.media-download-link, a[href*="/files/original/"]') || isPdfUrl(href);
+						return link.getAttribute('data-is-pdf-media') === '1'
+							|| link.matches('a.media-download-link, a[href*="/files/original/"]')
+							|| isPdfUrl(href);
 					}
 
 					function hasRenderedPdfMedia() {
@@ -279,6 +281,8 @@ if ($userBar) {
 								text: (link.textContent || '').trim(),
 								href: link.href || '',
 								target: link.target || '',
+								mediaType: link.getAttribute('data-media-type') || '',
+								isPdfMedia: link.getAttribute('data-is-pdf-media') || '',
 								hasDownload: link.hasAttribute('download'),
 								intercepts: shouldInterceptLink(link)
 							});
@@ -303,6 +307,8 @@ if ($userBar) {
 						debugLog('click candidate', {
 							href: link.href,
 							target: link.target || '',
+							mediaType: link.getAttribute('data-media-type') || '',
+							isPdfMedia: link.getAttribute('data-is-pdf-media') || '',
 							hasDownload: link.hasAttribute('download'),
 							intercepts: shouldInterceptLink(link)
 						});
