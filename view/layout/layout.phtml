@@ -291,6 +291,16 @@ if ($userBar) {
 						debugLog('download links detected', debugState.downloadLinks);
 					}
 
+					function hasPdfMediaLink() {
+						for (var i = 0; i < debugState.downloadLinks.length; i++) {
+							if (debugState.downloadLinks[i].isPdfMedia === '1') {
+								return true;
+							}
+						}
+
+						return false;
+					}
+
 					debugState.sessionValue = sessionStorage.getItem(storageKey);
 					debugLog('init', debugState.sessionValue);
 					collectDownloadLinks();
@@ -331,8 +341,11 @@ if ($userBar) {
 						openModal(link.href);
 					});
 
-					if (sessionStorage.getItem(storageKey) !== 'true' && debugState.renderedPdfDetected) {
-						debugLog('auto-opening modal for rendered pdf');
+					if (sessionStorage.getItem(storageKey) !== 'true' && (debugState.renderedPdfDetected || hasPdfMediaLink())) {
+						debugLog('auto-opening modal for pdf media on page load', {
+							renderedPdfDetected: debugState.renderedPdfDetected,
+							hasPdfMediaLink: hasPdfMediaLink()
+						});
 						openModal('');
 					}
 
