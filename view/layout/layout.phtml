@@ -341,10 +341,11 @@ if ($userBar) {
 						openModal(link.href);
 					});
 
-					if (sessionStorage.getItem(storageKey) !== 'true' && (debugState.renderedPdfDetected || hasPdfMediaLink())) {
+					if (debugState.renderedPdfDetected || hasPdfMediaLink()) {
 						debugLog('auto-opening modal for pdf media on page load', {
 							renderedPdfDetected: debugState.renderedPdfDetected,
-							hasPdfMediaLink: hasPdfMediaLink()
+							hasPdfMediaLink: hasPdfMediaLink(),
+							sessionValue: sessionStorage.getItem(storageKey)
 						});
 						openModal('');
 					}
