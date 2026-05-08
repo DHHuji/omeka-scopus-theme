@@ -189,41 +189,17 @@ if ($userBar) {
 					var agreeButton = document.getElementById('btn-agree');
 					var cancelButton = document.getElementById('btn-cancel');
 					var downloadSelector = 'a.media-download-link, a[href*="/files/original/"], .media-list a, .media-embeds a, .resource-list.media a';
-					var debugState = {
-						storageKey: storageKey,
-						sessionValue: null,
-						renderedPdfDetected: false,
-						renderedPdfCandidates: [],
-						downloadLinks: []
-					};
-
-					function debugLog(label, payload) {
-						if (typeof payload === 'undefined') {
-							console.log('[copyright-modal]', label);
-							return;
-						}
-
-						console.log('[copyright-modal]', label, payload);
-					}
 
 					if (!modal || !pendingUrlInput || !agreeButton || !cancelButton) {
-						debugLog('required modal elements missing', {
-							hasModal: !!modal,
-							hasPendingUrlInput: !!pendingUrlInput,
-							hasAgreeButton: !!agreeButton,
-							hasCancelButton: !!cancelButton
-						});
 						return;
 					}
 
 					function openModal(url) {
-						debugLog('openModal', { url: url });
 						pendingUrlInput.value = url;
 						modal.hidden = false;
 					}
 
 					function closeModal() {
-						debugLog('closeModal');
 						modal.hidden = true;
 						pendingUrlInput.value = '';
 					}
@@ -251,62 +227,27 @@ if ($userBar) {
 							var element = pdfMedia[i];
 							var source = element.getAttribute('src') || element.getAttribute('data') || '';
 							var type = element.getAttribute('type') || '';
-							var candidate = {
-								tagName: element.tagName,
-								id: element.id || '',
-								className: element.className || '',
-								source: source,
-								type: type,
-								matchesPdf: type.toLowerCase() === 'application/pdf' || isPdfUrl(source)
-							};
 
-							debugState.renderedPdfCandidates.push(candidate);
-
-							if (candidate.matchesPdf) {
-								debugLog('rendered pdf candidate matched', candidate);
+							if (type.toLowerCase() === 'application/pdf' || isPdfUrl(source)) {
 								return true;
 							}
 						}
 
-						debugLog('no rendered pdf candidate matched', debugState.renderedPdfCandidates);
 						return false;
 					}
 
-					function collectDownloadLinks() {
+					function hasPdfMediaLink() {
 						var links = document.querySelectorAll(downloadSelector);
 
 						for (var i = 0; i < links.length; i++) {
 							var link = links[i];
-							debugState.downloadLinks.push({
-								text: (link.textContent || '').trim(),
-								href: link.href || '',
-								target: link.target || '',
-								mediaType: link.getAttribute('data-media-type') || '',
-								isPdfMedia: link.getAttribute('data-is-pdf-media') || '',
-								hasDownload: link.hasAttribute('download'),
-								intercepts: shouldInterceptLink(link)
-							});
-						}
-
-						debugLog('download links detected', debugState.downloadLinks);
-					}
-
-					function hasPdfMediaLink() {
-						for (var i = 0; i < debugState.downloadLinks.length; i++) {
-							if (debugState.downloadLinks[i].isPdfMedia === '1') {
+							if (link.getAttribute('data-is-pdf-media') === '1') {
 								return true;
 							}
 						}
 
 						return false;
 					}
-
-					debugState.sessionValue = sessionStorage.getItem(storageKey);
-					debugLog('init', debugState.sessionValue);
-					collectDownloadLinks();
-					debugState.renderedPdfDetected = hasRenderedPdfMedia();
-					window.omekaCopyrightModalDebug = debugState;
-					debugLog('debug state', debugState);
 
 					document.addEventListener('click', function (event) {
 						var link = event.target.closest(downloadSelector);
@@ -314,26 +255,15 @@ if ($userBar) {
 							return;
 						}
 
-						debugLog('click candidate', {
-							href: link.href,
-							target: link.target || '',
-							mediaType: link.getAttribute('data-media-type') || '',
-							isPdfMedia: link.getAttribute('data-is-pdf-media') || '',
-							hasDownload: link.hasAttribute('download'),
-							intercepts: shouldInterceptLink(link)
-						});
-
 						if (!shouldInterceptLink(link)) {
 							return;
 						}
 
 						if (sessionStorage.getItem(storageKey) === 'true') {
-							debugLog('click skipped due to session agreement');
 							return;
 						}
 
 						if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || link.hasAttribute('download')) {
-							debugLog('click skipped due to modifier or download attribute');
 							return;
 						}
 
@@ -341,12 +271,7 @@ if ($userBar) {
 						openModal(link.href);
 					});
 
-					if (debugState.renderedPdfDetected || hasPdfMediaLink()) {
-						debugLog('auto-opening modal for pdf media on page load', {
-							renderedPdfDetected: debugState.renderedPdfDetected,
-							hasPdfMediaLink: hasPdfMediaLink(),
-							sessionValue: sessionStorage.getItem(storageKey)
-						});
+					if (hasRenderedPdfMedia() || hasPdfMediaLink()) {
 						openModal('');
 					}
 
