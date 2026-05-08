@@ -97,18 +97,15 @@
       padding: 16px 0 0 16px;
 
       .filter {
-        padding: 2px;
-        margin-inline-start: 16px;
-
         .filter-value::after {
           content: " ×";
           font-weight: bold;
-          color: #999;
+          color: white;
           margin-left: 4px;
         }
 
         .filter-value:hover::after {
-          color: #c00;
+          color: var(--primary);
         }
       }
     }
