@@ -204,9 +204,39 @@ if ($userBar) {
 						pendingUrlInput.value = '';
 					}
 
+					function isPdfUrl(url) {
+						try {
+							var parsedUrl = new URL(url, window.location.href);
+							return /\.pdf$/i.test(parsedUrl.pathname);
+						} catch (error) {
+							return /\.pdf(?:$|\?)/i.test(url);
+						}
+					}
+
+					function shouldInterceptLink(link) {
+						var href = link.href || '';
+						return link.matches('a.media-download-link, a[href*="/files/original/"]') || isPdfUrl(href);
+					}
+
+					function hasRenderedPdfMedia() {
+						var pdfMedia = document.querySelectorAll('iframe, embed, object');
+
+						for (var i = 0; i < pdfMedia.length; i++) {
+							var element = pdfMedia[i];
+							var source = element.getAttribute('src') || element.getAttribute('data') || '';
+							var type = element.getAttribute('type') || '';
+
+							if (type.toLowerCase() === 'application/pdf' || isPdfUrl(source)) {
+								return true;
+							}
+						}
+
+						return false;
+					}
+
 					document.addEventListener('click', function (event) {
 						var link = event.target.closest(downloadSelector);
-						if (!link || !link.href) {
+						if (!link || !link.href || !shouldInterceptLink(link)) {
 							return;
 						}
 
@@ -214,13 +244,17 @@ if ($userBar) {
 							return;
 						}
 
-						if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || link.target === '_blank' || link.hasAttribute('download')) {
+						if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || link.hasAttribute('download')) {
 							return;
 						}
 
 						event.preventDefault();
 						openModal(link.href);
 					});
+
+					if (sessionStorage.getItem(storageKey) !== 'true' && hasRenderedPdfMedia()) {
+						openModal('');
+					}
 
 					agreeButton.addEventListener('click', function () {
 						var targetUrl = pendingUrlInput.value;
