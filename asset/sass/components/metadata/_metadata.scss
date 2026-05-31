@@ -220,6 +220,13 @@
         }
     }
 
+    .linked-resource-table {
+        max-width: 820px;
+        th {
+            text-align: start;
+        }
+    }
+
     .value.resource {
         .resource-link {
             display: inline-flex;
