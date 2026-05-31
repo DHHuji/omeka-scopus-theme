@@ -230,8 +230,8 @@ $useTabs = $tabsMode === 'tabs' && count($configuredTabs) >= 2;
 
 $linkedResourceTables = [];
 for ($i = 1; $i <= 3; $i++) {
-    $itemSetId = trim((string) $this->themeSetting(sprintf('linked_resource_table_%d_item_set', $i), ''));
-    if ($itemSetId === '') {
+    $resourceTemplateId = trim((string) $this->themeSetting(sprintf('linked_resource_table_%d_resource_template', $i), ''));
+    if ($resourceTemplateId === '') {
         continue;
     }
     $propertyIds = $normalizePropertySelectValues($this->themeSetting(sprintf('linked_resource_table_%d_properties', $i)));
@@ -251,7 +251,7 @@ for ($i = 1; $i <= 3; $i++) {
     if (!$resolvedProps) {
         continue;
     }
-    $linkedResourceTables[$itemSetId] = $resolvedProps;
+    $linkedResourceTables[$resourceTemplateId] = $resolvedProps;
 }
 
 $renderProperty = function ($term, $propertyData) use (
@@ -283,12 +283,12 @@ $renderProperty = function ($term, $propertyData) use (
             $matchedClassId = null;
             if ($vType === 'resource' || strpos($vType, 'resource') !== false) {
                 $linked = $v->valueResource();
-                if ($linked && method_exists($linked, 'itemSets')) {
-                    foreach ($linked->itemSets() as $itemSet) {
-                        $isId = (string) $itemSet->id();
-                        if (isset($linkedResourceTables[$isId])) {
-                            $matchedClassId = $isId;
-                            break;
+                if ($linked && method_exists($linked, 'resourceTemplate')) {
+                    $linkedTemplate = $linked->resourceTemplate();
+                    if ($linkedTemplate) {
+                        $rtId = (string) $linkedTemplate->id();
+                        if (isset($linkedResourceTables[$rtId])) {
+                            $matchedClassId = $rtId;
                         }
                     }
                 }
