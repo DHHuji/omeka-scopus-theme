@@ -145,7 +145,13 @@ if (is_array($decoration) && in_array('media', $decoration)) {
                 <div class="resource__meta <?php echo ($isGrid) ? '' : 'media-object-section'; ?>">
                     <?php echo $item->link($item->displayTitle(null, $valueLang)); ?>
                     <?php if ($body): ?>
-                        <div class="description <?php echo ($bodyTruncate) ? $bodyTruncate : ''; ?>"><?php echo $escape($body); ?></div>
+                        <div class="description <?php echo ($bodyTruncate) ? $bodyTruncate : ''; ?>"><?php
+                        if (method_exists($body, 'type') && strpos($body->type(), 'resource') !== false && ($linkedResource = $body->valueResource())) {
+                            echo $escape($body->property()->label()) . ': <a href="' . $escape($linkedResource->siteUrl()) . '" target="_blank">' . $escape($linkedResource->displayTitle()) . '</a>';
+                        } else {
+                            echo $escape($body);
+                        }
+                        ?></div>
                     <?php endif; ?>
                 </div>
             </div>
