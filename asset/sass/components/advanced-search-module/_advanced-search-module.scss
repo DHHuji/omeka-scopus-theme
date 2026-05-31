@@ -11,7 +11,6 @@
   }
 
   label {
-    padding-bottom: 4px;
     font-size: 0.9rem;
   }
 
@@ -162,6 +161,8 @@
     list-style: none;
     padding: 0;
     margin: 0;
+    columns: 2;
+    column-gap: 8px;
   }
 
   .facet-item {
@@ -173,6 +174,10 @@
     align-items: center;
     font-size: 0.9rem;
     cursor: pointer;
+    min-height: 40px;
+    break-inside: avoid;
+    -webkit-column-break-inside: avoid;
+    page-break-inside: avoid;
   }
 
   .facet-item[hidden="hidden"] {
