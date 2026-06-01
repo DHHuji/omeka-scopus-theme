@@ -150,9 +150,11 @@
   .facet h4 {
     font-size: 1rem;
     font-weight: 600;
-    margin: 20px 0 10px 0;
+    margin-bottom: 10px;
     padding-inline-start: 5px;
     border-inline-start: 3px solid $color__accent;
+    line-height: 1.2;
+    min-height: calc(2 * 1.2em);
   }
 
   /* Facet Item List */
@@ -165,6 +167,7 @@
       break-inside: avoid;
       -webkit-column-break-inside: avoid;
       page-break-inside: avoid;
+      padding-top: 20px;
     }
   }
 
