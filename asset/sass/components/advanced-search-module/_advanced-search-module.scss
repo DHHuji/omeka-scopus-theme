@@ -160,8 +160,9 @@
   /* Facet Item List */
 
   .facets-list {
-    columns: 2;
-    column-gap: 0.5rem;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
 
     .facet {
       break-inside: avoid;
