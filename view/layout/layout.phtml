@@ -10,6 +10,9 @@ $bannerHeightProperty = $bannerHeading || $bannerDescription ? 'min-height' : 'h
 $primaryColor = $this->themeSetting('primary_color') ?? '#5CB99A';
 $secondaryColor = $this->themeSetting('secondary_color') ?? '#2B7F8B';
 $accentColor = $this->themeSetting('accent_color') ?? '#01544B';
+$fontFamily = trim((string) $this->themeSetting('font_family', ''));
+$fontImportUrl = trim((string) $this->themeSetting('font_import_url', ''));
+$fontImportUrlCss = str_replace(['\\', "'"], ['\\\\', "\\'"], $fontImportUrl);
 $displayImageTermsOfUse = (bool) $this->themeSetting('display_image_terms_of_use');
 
 $this->htmlElement('html')->setAttribute('lang', $this->lang());
@@ -42,6 +45,10 @@ if ($userBar) {
 		<?php echo $this->headScript(); ?>
 
 		<style media="screen">
+			<?php if ($fontFamily && $fontImportUrl): ?>
+				@import url('<?php echo $fontImportUrlCss; ?>');
+			<?php endif; ?>
+
 			:root {
 				--primary: <?php echo $primaryColor; ?>;
 				--primary-dark: <?php echo $this->ShadeColor($primaryColor, -10); ?>;
@@ -52,6 +59,12 @@ if ($userBar) {
 				--accent: <?php echo $accentColor; ?>;
 				--accent-dark: <?php echo $this->ShadeColor($accentColor, -10); ?>;
 			}
+
+			<?php if ($fontFamily): ?>
+				html, body {
+					font-family: <?php echo $fontFamily; ?>, serif;
+				}
+			<?php endif; ?>
 			
 			<?php if($bannerHeightMobile): ?>
 				@media screen and (max-width:768px) {
