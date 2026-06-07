@@ -24,7 +24,7 @@ $headerHeight = (int) $this->themeSetting('header_height');
 					src="<?php echo $this->themeSettingAssetUrl('logo'); ?>"
 					alt="<?php echo $this->escapeHtml( $site->title() ); ?>"
 					<?php if ($headerHeight > 0): ?>
-					style="height: <?php echo $headerHeight; ?>px; width: auto;"
+					style="height: <?php echo $headerHeight; ?>px; max-height: none; width: auto;"
 					<?php endif; ?>
 				/>
 			<?php else: ?>
