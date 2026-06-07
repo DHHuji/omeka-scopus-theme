@@ -1,6 +1,7 @@
 <?php
 $translate = $this->plugin('translate');
 $navDepth = (int) $this->themeSetting('nav_depth') ? (int) $this->themeSetting('nav_depth') -1 : -1;
+$headerHeight = (int) $this->themeSetting('header_height');
 ?>
 
 <header class="main-header">
@@ -19,7 +20,13 @@ $navDepth = (int) $this->themeSetting('nav_depth') ? (int) $this->themeSetting('
 		<h1 class="main-header__site-title site-title">
 			<a href="<?php echo $site->url(); ?>">
 			<?php if ($this->themeSetting('logo')): ?>
-				<img src="<?php echo $this->themeSettingAssetUrl('logo'); ?>" alt="<?php echo $this->escapeHtml( $site->title() ); ?>" />
+				<img
+					src="<?php echo $this->themeSettingAssetUrl('logo'); ?>"
+					alt="<?php echo $this->escapeHtml( $site->title() ); ?>"
+					<?php if ($headerHeight > 0): ?>
+					style="height: <?php echo $headerHeight; ?>px; width: auto;"
+					<?php endif; ?>
+				/>
 			<?php else: ?>
 				<?php echo $this->escapeHtml( $site->title() ); ?>
 			<?php endif; ?>
