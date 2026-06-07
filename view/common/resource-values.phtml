@@ -341,6 +341,32 @@ $propertyColorMaps = [
     ],
 ];
 
+$linkedResourceTables = [];
+for ($i = 1; $i <= 3; $i++) {
+    $resourceTemplateId = trim((string) $this->themeSetting(sprintf('linked_resource_table_%d_resource_template', $i), ''));
+    if ($resourceTemplateId === '') {
+        continue;
+    }
+    $propertyIds = $normalizePropertySelectValues($this->themeSetting(sprintf('linked_resource_table_%d_properties', $i)));
+    if (!$propertyIds) {
+        continue;
+    }
+    $resolvedProps = [];
+    foreach ($propertyIds as $propId) {
+        if (!is_numeric($propId)) {
+            continue;
+        }
+        try {
+            $prop = $this->api()->read('properties', (int) $propId)->getContent();
+            $resolvedProps[] = ['term' => $prop->term(), 'label' => $translate($prop->label())];
+        } catch (\Exception $e) {}
+    }
+    if (!$resolvedProps) {
+        continue;
+    }
+    $linkedResourceTables[$resourceTemplateId] = $resolvedProps;
+}
+
 $renderProperty = function ($term, $propertyData) use (
     $filterLocale,
     $filterLocaleCallback,
@@ -354,7 +380,8 @@ $renderProperty = function ($term, $propertyData) use (
     $lang,
     $propertyColorMaps,
     $resource,
-    $getPropertyStrengthHistogram
+    $getPropertyStrengthHistogram,
+    $linkedResourceTables
 ) {
     $propertyValues = $propertyData['values'];
     if ($filterLocale) {
@@ -363,8 +390,37 @@ $renderProperty = function ($term, $propertyData) use (
     if (!$propertyValues) {
         return;
     }
+    $tableGroups = [];
+    $normalPropertyValues = $propertyValues;
+    if ($linkedResourceTables) {
+        $normalPropertyValues = [];
+        foreach ($propertyValues as $v) {
+            $vType = $v->type();
+            $matchedClassId = null;
+            if ($vType === 'resource' || strpos($vType, 'resource') !== false) {
+                $linked = $v->valueResource();
+                if ($linked && method_exists($linked, 'resourceTemplate')) {
+                    $linkedTemplate = $linked->resourceTemplate();
+                    if ($linkedTemplate) {
+                        $rtId = (string) $linkedTemplate->id();
+                        if (isset($linkedResourceTables[$rtId])) {
+                            $matchedClassId = $rtId;
+                        }
+                    }
+                }
+            }
+            if ($matchedClassId !== null) {
+                $tableGroups[$matchedClassId][] = $v;
+            } else {
+                $normalPropertyValues[] = $v;
+            }
+        }
+        if (!$normalPropertyValues && !$tableGroups) {
+            return;
+        }
+    }
     $property = $propertyData['property'];
-    $isMultiValue = count($propertyValues) > 1;
+    $isMultiValue = count($normalPropertyValues) > 1;
     $propertyLabel = $propertyData['alternate_label'] ?: $translate($property->label());
     if ('term' === $labelInfo) {
         $propertyTerm = $property->term();
@@ -421,7 +477,7 @@ $renderProperty = function ($term, $propertyData) use (
         <?php if ($isMultiValue): ?>
         <div class="property__values">
         <?php endif; ?>
-        <?php foreach ($propertyValues as $value): ?>
+        <?php foreach ($normalPropertyValues as $value): ?>
             <?php
             $valueType = $value->type();
             $valueLang = $value->lang();
@@ -501,6 +557,38 @@ $renderProperty = function ($term, $propertyData) use (
         <?php if ($isMultiValue): ?>
         </div>
         <?php endif; ?>
+        <?php foreach ($tableGroups as $tableItemSetId => $tableGroupValues): ?>
+        <?php
+        $tableProps = $linkedResourceTables[$tableItemSetId];
+        $firstLinked = count($tableGroupValues) > 0 ? $tableGroupValues[0]->valueResource() : null;
+        $resourceTypeLabels = ['items' => 'Item', 'item_sets' => 'Item Set', 'media' => 'Media'];
+        $resourceTypeName = $firstLinked ? ($resourceTypeLabels[$firstLinked->resourceName()] ?? ucwords(str_replace('_', ' ', $firstLinked->resourceName()))) : 'Item';
+        ?>
+        <dd class="value resource-table">
+        <table class="linked-resource-table">
+            <thead>
+                <tr>
+                    <th><?php echo $escape($resourceTypeName); ?></th>
+                    <?php foreach ($tableProps as $tableProp): ?>
+                    <th><?php echo $escape($tableProp['label']); ?></th>
+                    <?php endforeach; ?>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ($tableGroupValues as $tableValue): ?>
+                <?php $tableLinked = $tableValue->valueResource(); ?>
+                <tr>
+                    <td><?php echo $tableValue->asHtml(); ?></td>
+                    <?php foreach ($tableProps as $tableProp): ?>
+                    <?php $cellVal = $tableLinked ? $tableLinked->value($tableProp['term']) : null; ?>
+                    <td><?php echo $cellVal ? $cellVal->asHtml() : ''; ?></td>
+                    <?php endforeach; ?>
+                </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+        </dd>
+        <?php endforeach; ?>
         <?php if ($isCollapsible): ?>
         </details>
         <?php endif; ?>
@@ -530,12 +618,31 @@ foreach ($values as $term => $propertyData) {
     }
     $tabBuckets[$tabIndex][$term] = $propertyData;
 }
+$renderedTabs = [];
+foreach ($configuredTabs as $index => $tab) {
+    if (!$tabBuckets[$index]) {
+        continue;
+    }
+    $renderedTabs[] = [
+        'label' => $tab['label'],
+        'properties' => $tab['properties'],
+        'bucket' => $tabBuckets[$index],
+    ];
+}
+$useRenderedTabs = count($renderedTabs) >= 2;
 $tabsComponentId = 'resource-values-tabs-' . substr(md5(uniqid((string) mt_rand(), true)), 0, 8);
 ?>
+<?php if (!$useRenderedTabs): ?>
+<dl>
+    <?php foreach ($values as $term => $propertyData): ?>
+        <?php $renderProperty($term, $propertyData); ?>
+    <?php endforeach; ?>
+</dl>
+<?php else: ?>
 <div class="resource-values-tabs" data-resource-values-tabs id="<?php echo $escape($tabsComponentId); ?>">
     <div class="tabs is-toggle">
         <ul role="tablist">
-            <?php foreach ($configuredTabs as $index => $tab): ?>
+            <?php foreach ($renderedTabs as $index => $tab): ?>
             <li class="<?php echo $index === 0 ? 'is-active' : ''; ?>">
                 <a
                     href="#<?php echo $escape($tabsComponentId . '-panel-' . $index); ?>"
@@ -549,14 +656,14 @@ $tabsComponentId = 'resource-values-tabs-' . substr(md5(uniqid((string) mt_rand(
             <?php endforeach; ?>
         </ul>
     </div>
-    <?php foreach ($configuredTabs as $index => $tab): ?>
+    <?php foreach ($renderedTabs as $index => $tab): ?>
     <div
         id="<?php echo $escape($tabsComponentId . '-panel-' . $index); ?>"
         class="resource-values-tabs__panel"
         style="<?php echo $index === 0 ? '' : 'display: none;'; ?>"
     >
         <dl>
-            <?php foreach ($tabBuckets[$index] as $term => $propertyData): ?>
+            <?php foreach ($tab['bucket'] as $term => $propertyData): ?>
                 <?php $renderProperty($term, $propertyData); ?>
             <?php endforeach; ?>
         </dl>
@@ -593,4 +700,5 @@ if (!window.ScopusResourceValueTabsInitialized) {
     });
 }
 </script>
+<?php endif; ?>
 <?php endif; ?>

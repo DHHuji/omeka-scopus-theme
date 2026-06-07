@@ -11,7 +11,6 @@
   }
 
   label {
-    padding-bottom: 4px;
     font-size: 0.9rem;
   }
 
@@ -71,6 +70,7 @@
   }
 
   .search-form-buttons {
+    height: 0;
     button {
       float: unset;
       position: relative;
@@ -96,8 +96,16 @@
       padding: 16px 0 0 16px;
 
       .filter {
-        padding: 2px;
-        margin-inline-start: 16px;
+        .filter-value::after {
+          content: " ×";
+          font-weight: bold;
+          color: white;
+          margin-left: 4px;
+        }
+
+        .filter-value:hover::after {
+          color: var(--primary);
+        }
       }
     }
 
@@ -112,6 +120,19 @@
     border-radius: 10px;
     padding: 20px;
     box-shadow: 0 4px 12px rgba($color__black, 0.05);
+
+    flex: 0 0 35%;
+    min-width: 240px;
+    max-width: 50vw;
+  }
+
+  fieldset {
+    padding: 1rem;
+    padding-bottom: 4rem;
+    margin: 0;
+    select {
+      min-height: 12rem;
+    }
   }
 
   /* Sidebar Title (Facets) */
@@ -129,12 +150,27 @@
   .facet h4 {
     font-size: 1rem;
     font-weight: 600;
-    margin: 20px 0 10px 0;
+    margin-bottom: 10px;
     padding-inline-start: 5px;
     border-inline-start: 3px solid $color__accent;
+    line-height: 1.2;
+    min-height: calc(2 * 1.2em);
   }
 
   /* Facet Item List */
+
+  .facets-list {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+
+    .facet {
+      break-inside: avoid;
+      -webkit-column-break-inside: avoid;
+      page-break-inside: avoid;
+      padding-top: 20px;
+    }
+  }
 
   .facet-items {
     list-style: none;
@@ -243,5 +279,9 @@
   .facet-elements {
     display: flex;
     flex-direction: column-reverse;
+  }
+
+  #search-refine {
+    width: 100%;
   }
 }

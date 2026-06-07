@@ -11,13 +11,14 @@ $decoration = $this->themeSetting('image_decoration');
             <?php
             $altText = $media->altText() ?: $media->displayTitle() ?: '';
             $thumbnail = $this->thumbnail($media, 'square', ['alt' => $altText]);
+            $mediaType = (string) $media->mediaType();
             $linkContent = sprintf('%s<span class="resource-name">%s</span>',
                 $thumbnail,
                 $escape($media->displayTitle())
             );
             ?>
             <dd class="value <?php echo is_array($decoration) && in_array('media', $decoration) ? 'decoration decoration--thumbnail' : ''; ?>">
-                <?php echo $media->linkRaw($linkContent, null, ['class' => 'resource-link', 'target' => '_blank', 'rel' => 'noopener']); ?>
+                <?php echo $media->linkRaw($linkContent, null, ['class' => 'resource-link', 'target' => '_blank', 'rel' => 'noopener', 'data-media-type' => $mediaType, 'data-is-pdf-media' => $mediaType === 'application/pdf' ? '1' : '0']); ?>
             </dd>
         <?php endforeach; ?>
     </div>

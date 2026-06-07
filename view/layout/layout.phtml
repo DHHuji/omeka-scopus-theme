@@ -10,6 +10,9 @@ $bannerHeightProperty = $bannerHeading || $bannerDescription ? 'min-height' : 'h
 $primaryColor = $this->themeSetting('primary_color') ?? '#5CB99A';
 $secondaryColor = $this->themeSetting('secondary_color') ?? '#2B7F8B';
 $accentColor = $this->themeSetting('accent_color') ?? '#01544B';
+$fontFamily = trim((string) $this->themeSetting('font_family', ''));
+$fontImportUrl = trim((string) $this->themeSetting('font_import_url', ''));
+$fontImportUrlCss = str_replace(['\\', "'"], ['\\\\', "\\'"], $fontImportUrl);
 $displayImageTermsOfUse = (bool) $this->themeSetting('display_image_terms_of_use');
 
 $this->htmlElement('html')->setAttribute('lang', $this->lang());
@@ -42,6 +45,10 @@ if ($userBar) {
 		<?php echo $this->headScript(); ?>
 
 		<style media="screen">
+			<?php if ($fontFamily && $fontImportUrl): ?>
+				@import url('<?php echo $fontImportUrlCss; ?>');
+			<?php endif; ?>
+
 			:root {
 				--primary: <?php echo $primaryColor; ?>;
 				--primary-dark: <?php echo $this->ShadeColor($primaryColor, -10); ?>;
@@ -52,6 +59,12 @@ if ($userBar) {
 				--accent: <?php echo $accentColor; ?>;
 				--accent-dark: <?php echo $this->ShadeColor($accentColor, -10); ?>;
 			}
+
+			<?php if ($fontFamily): ?>
+				html, body {
+					font-family: <?php echo $fontFamily; ?>, serif;
+				}
+			<?php endif; ?>
 			
 			<?php if($bannerHeightMobile): ?>
 				@media screen and (max-width:768px) {
@@ -204,9 +217,58 @@ if ($userBar) {
 						pendingUrlInput.value = '';
 					}
 
+					function isPdfUrl(url) {
+						try {
+							var parsedUrl = new URL(url, window.location.href);
+							return /\.pdf$/i.test(parsedUrl.pathname);
+						} catch (error) {
+							return /\.pdf(?:$|\?)/i.test(url);
+						}
+					}
+
+					function shouldInterceptLink(link) {
+						var href = link.href || '';
+						return link.getAttribute('data-is-pdf-media') === '1'
+							|| link.matches('a.media-download-link, a[href*="/files/original/"]')
+							|| isPdfUrl(href);
+					}
+
+					function hasRenderedPdfMedia() {
+						var pdfMedia = document.querySelectorAll('iframe, embed, object');
+
+						for (var i = 0; i < pdfMedia.length; i++) {
+							var element = pdfMedia[i];
+							var source = element.getAttribute('src') || element.getAttribute('data') || '';
+							var type = element.getAttribute('type') || '';
+
+							if (type.toLowerCase() === 'application/pdf' || isPdfUrl(source)) {
+								return true;
+							}
+						}
+
+						return false;
+					}
+
+					function hasPdfMediaLink() {
+						var links = document.querySelectorAll(downloadSelector);
+
+						for (var i = 0; i < links.length; i++) {
+							var link = links[i];
+							if (link.getAttribute('data-is-pdf-media') === '1') {
+								return true;
+							}
+						}
+
+						return false;
+					}
+
 					document.addEventListener('click', function (event) {
 						var link = event.target.closest(downloadSelector);
 						if (!link || !link.href) {
+							return;
+						}
+
+						if (!shouldInterceptLink(link)) {
 							return;
 						}
 
@@ -214,13 +276,17 @@ if ($userBar) {
 							return;
 						}
 
-						if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || link.target === '_blank' || link.hasAttribute('download')) {
+						if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || link.hasAttribute('download')) {
 							return;
 						}
 
 						event.preventDefault();
 						openModal(link.href);
 					});
+
+					if (hasRenderedPdfMedia() || hasPdfMediaLink()) {
+						openModal('');
+					}
 
 					agreeButton.addEventListener('click', function () {
 						var targetUrl = pendingUrlInput.value;

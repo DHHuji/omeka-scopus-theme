@@ -26,6 +26,7 @@ $showBody = in_array('resource-body', $this->components);
 $headingTerm = $this->siteSetting('browse_heading_property_term');
 $bodyTerm = $this->siteSetting('browse_body_property_term');
 $decoration = $this->themeSetting('image_decoration');
+$defaultThumbnailAsset = $this->themeSettingAsset('default_thumbnail');
 $decorationClass = '';
 
 if (is_array($decoration) && in_array('media', $decoration)) {
@@ -59,6 +60,9 @@ if (is_array($decoration) && in_array('media', $decoration)) {
             $media = ($resource instanceof \Omeka\Api\Representation\ItemRepresentation) ? ($resource->media()[0] ?? null) : null;
             $altText = $media ? ($media->altText() ?: $resource->displayTitle()) : $resource->displayTitle();
             $thumbnail = $this->thumbnail($resource, 'large', ['alt' => $altText]);
+            if (!$thumbnail && $defaultThumbnailAsset) {
+                $thumbnail = $this->thumbnail($defaultThumbnailAsset, 'large', ['alt' => $altText]);
+            }
             ?>
             <li class="<?php echo $this->resourceType; ?> resource <?php echo ($isGrid) ? '' : 'media-object'; ?>">
                 <!-- Thumbnail -->
